@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+
+@import './variable';
+@import './mixins';
+@import './base';
+
+// Components
+@import './components/header';
+@import './components/hero-slide';
+@import './components/button';
+@import './components/policy-card';
+@import './components/footer';
+@import './components/product-card';
+@import './components/section';
+@import './components/catalog';
+@import './components/custom-checkbox';
+@import './components/product';
+@import './components/quantity';
+@import './components/product-modal';
+@import './components/auth-form-modal';
+
+// Components__Auth
+@import './components/auth/input';
+
+// Pages
+@import './pages/auth';

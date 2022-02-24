@@ -1,0 +1,54 @@
+.btn {
+	outline: none;
+	border: none;
+	background-color: $main-color;
+	position: relative;
+	color: $txt-white;
+	cursor: pointer;
+	overflow: hidden;
+	text-transform: capitalize;
+
+	&__txt {
+		@include flex(center, center);
+		padding: 1rem 2rem;
+		transition: transform 0.3s ease;
+		font-size: 1.5rem;
+	}
+
+	&__icon {
+		@include flex(center, center);
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		transform: translateX(-100%);
+		transition: transform 0.3s ease;
+		font-size: 2.4rem;
+	}
+
+	&-animate:hover &__txt {
+		transform: translateX(100%);
+	}
+
+	&-animate:hover &__icon {
+		transform: translateX(0);
+	}
+
+	&-sm &__txt {  
+		padding: 0.7rem 1.5rem;
+		font-size: 1.6rem;
+	}
+
+	&-sm &__icon {
+		font-size: 2.1rem;
+	}
+
+	&-lg &__txt {
+		font-size: 1.8rem;
+	}
+
+	&-lg &__icon {
+		font-size: 2.5rem;
+	}
+}

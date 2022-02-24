@@ -1,0 +1,23 @@
+.quantity {
+	@include flex();
+	color: $txt-color-2;
+	background-color: $main-bg;
+
+	&__btn {
+		@include flex(center, center);
+		width: 30px;
+		height: 30px;
+		font-size: 2rem;
+		border: 2px solid $txt-color-2;
+		cursor: pointer;
+	}
+
+	&__input {
+		@include flex(center, center);
+		width: 60px;
+		height: 30px;
+		border-top: 2px solid $txt-color-2;
+		border-bottom: 2px solid $txt-color-2;
+		font-size: 2rem;
+	}
+}

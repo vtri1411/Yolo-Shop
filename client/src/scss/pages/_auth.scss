@@ -1,0 +1,57 @@
+.auth {
+	margin: 80px auto 40px;
+	border: 1px solid #000;
+	max-width: 600px;
+	position: relative;
+	padding: 30px 20px 20px;
+
+	&__title {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		color: $main-color;
+		font-size: 2.2rem;
+		font-weight: 600;
+		padding: 4px;
+		background-color: $main-bg;
+		border: 1px solid $main-color;
+	}
+
+	&__form {
+		display: flex;
+		flex-direction: column;
+
+		&__group {
+			display: flex;
+			flex-direction: column;
+
+			& ~ & {
+				margin-top: 20px;
+			}
+
+			&__label {
+				color: $main-color;
+				font-size: 1.6rem;
+				margin-bottom: 6px;
+			}
+		}
+	}
+
+	&__option {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px 0;
+		flex-wrap: wrap;
+
+		&__text {
+			margin-right: 4px;
+		}
+
+		&__link {
+			text-decoration: underline;
+			color: $txt-color-1;
+		}
+	}
+}

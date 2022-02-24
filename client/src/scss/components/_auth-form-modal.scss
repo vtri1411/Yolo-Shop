@@ -1,0 +1,113 @@
+.auth-form__modal {
+	$txt-form-color: #555;
+	$error-color: #c80000;
+
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba($color: #000000, $alpha: 0.6);
+	z-index: 100;
+	color: #000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	&__wrapper {
+		background-color: white;
+		padding: 30px;
+		min-width: 500px;
+		border-radius: 10px;
+	}
+
+	&__title {
+		h5 {
+			color: $txt-form-color;
+			font-size: 2rem;
+			font-weight: 600;
+			text-align: center;
+		}
+	}
+
+	&__input {
+		&__email-phone,
+		&__password {
+			display: flex;
+			flex-direction: column;
+			color: $txt-form-color;
+			position: relative;
+
+			label {
+				position: absolute;
+				top: 0;
+				pointer-events: none;
+				transition: top ease 0.4s;
+			}
+
+			input {
+				border: none;
+				outline: none;
+				padding: 6px 0;
+				font-size: 1.6rem;
+				border-bottom: 2px solid $txt-form-color;
+			}
+
+			input:focus ~ label,
+			input:not([value='']) ~ label {
+				top: -20px;
+			}
+		}
+
+		&__password-toggle {
+			position: absolute;
+			right: 10px;
+			top: 8px;
+			cursor: pointer;
+		}
+
+		&__error {
+			position: relative;
+			color: $error-color;
+			font-weight: 600;
+			font-size: 1.4rem;
+			margin-top: 10px;
+		}
+	}
+
+	&__button {
+		width: 100%;
+		border-radius: 30px;
+		border: none;
+		outline: none;
+		padding: 15px;
+		font-size: 1.6rem;
+		color: $txt-white;
+		text-transform: uppercase;
+		cursor: pointer;
+		background: #b721ff;
+		background: linear-gradient(to right, #21d4fd, #b721ff);
+		background-position: 0 0;
+		transition: all ease 0.4s;
+	}
+
+	&__forget-password {
+		color: $main-color;
+
+		&:hover {
+			text-decoration: underline;
+			cursor: pointer;
+		}
+	}
+
+	&__register {
+		span {
+			color: $main-color;
+			cursor: pointer;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+}

@@ -1,0 +1,185 @@
+.product {
+	@include flex();
+	padding: 2rem 0;
+
+	@include sm {
+		flex-wrap: wrap;
+	}
+
+	&__imgs {
+		@include flex();
+		width: 60%;
+		padding: 0 2rem;
+		flex-wrap: wrap;
+
+		@include sm {
+			width: 100%;
+			padding: 0 1rem;
+		}
+
+		&__wrap {
+			@include flex();
+			width: 100%;
+		}
+
+		&__list {
+			width: 20%;
+			margin-right: 2rem;
+
+			&__item {
+				& > * ~ * {
+					margin-top: 2rem;
+				}
+
+				img {
+					width: 100%;
+					cursor: pointer;
+
+					&.active {
+						border: 1px solid $main-color;
+					}
+				}
+			}
+		}
+		&__main {
+			width: 80%;
+		}
+	}
+
+	&__desc {
+		width: 100%;
+		margin-top: 5rem;
+		position: relative;
+		overflow: hidden;
+		max-height: 50rem;
+
+		&.mobile {
+			display: none;
+		}
+
+		@include sm {
+			display: none;
+
+			&.mobile {
+				display: block;
+				margin-top: 3rem;
+			}
+		}
+
+		&.active {
+			max-height: fit-content;
+		}
+
+		&__title {
+			font-size: 2.6rem;
+			font-weight: 600;
+		}
+
+		&__content {
+			font-family: 'Roboto', sans-serif;
+			font-size: 1.6rem;
+			line-height: 1.5;
+			margin-top: 2rem;
+		}
+
+		&__btn {
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			transform: translateX(-50%);
+		}
+	}
+
+	&__info {
+		position: sticky;
+		top: calc(#{$header-shrink-height} + 50px);
+		padding: 0 2rem;
+
+		&__name {
+			font-size: 4rem;
+			font-weight: 400;
+		}
+
+		&__item {
+			margin-top: 2rem;
+
+			&__title {
+				font-size: 2rem;
+				font-weight: 500;
+				margin-bottom: 1rem;
+			}
+
+			&__list {
+				@include flex();
+				& > * ~ * {
+					margin-left: 1rem;
+				}
+				&__item {
+					@include flex(center, center);
+					width: 40px;
+					height: 40px;
+					border-radius: 50%;
+					cursor: pointer;
+					border: 2px solid $txt-color-2;
+
+					&.active,
+					&:hover {
+						border-color: $main-color;
+					}
+					.circle {
+						width: 30px;
+						height: 30px;
+						border-radius: 50%;
+					}
+					.size {
+						@include flex(center, center);
+						width: 100%;
+						height: 100%;
+						border-radius: 50%;
+						font-size: 2.4rem;
+						text-transform: uppercase;
+						color: $txt-color-2;
+					}
+				}
+			}
+		}
+
+		&__btn {
+			& > * {
+				margin-top: 2rem;
+			}
+
+			& > *:first-child {
+				margin-right: 2rem;
+			}
+		}
+
+		&__price {
+			font-size: 3rem;
+			font-weight: 500;
+			color: $main-color;
+		}
+
+		@include sm {
+			position: static;
+			width: 100%;
+			margin-top: 2rem;
+
+			&__name {
+				font-size: 3rem;
+			}
+
+			&__item {
+				margin-top: 1rem;
+
+				&__btn {
+					margin-top: 2rem;
+				}
+			}
+
+			&__price {
+				font-size: 2.6rem;
+			}
+		}
+	}
+}

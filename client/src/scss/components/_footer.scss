@@ -1,0 +1,40 @@
+.footer {
+	width: 100%;
+	background-color: $main-bg;
+	padding: 2rem 0;
+	box-shadow: $box-shadow;
+	font-size: 1.6rem;
+
+	&__title {
+		font-weight: 600;
+	}
+
+	&__title,
+	&__logo {
+		margin: 2rem 0;
+	}
+
+	&__content {
+		margin-top: 2rem;
+
+		& > * ~ * {
+			margin-top: 1rem;
+		}
+
+		a:hover {
+			color: $main-color;
+		}
+	}
+
+	&__logo {
+		height: 30px;
+
+		img {
+			height: 100%;
+		}
+	}
+
+	&__about {
+		font-size: 1.5rem;
+	}
+}

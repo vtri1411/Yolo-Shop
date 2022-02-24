@@ -1,0 +1,141 @@
+.hero-slide {
+	height: 100vh;
+	max-height: 1080px;
+	overflow: hidden;
+	padding: 1rem;
+	margin-top: -$header-height;
+
+	@include md {
+		margin-top: -$header-md-height;
+	}
+
+	@include sm {
+		margin-top: -$header-sm-height;
+	}
+
+	.swiper-container {
+		height: 100%;
+	}
+
+	&__item {
+		@include flex(center);
+		height: 100%;
+		overflow: hidden;
+
+		@include md {
+			flex-direction: column-reverse;
+			padding-top: $header-md-height;
+		}
+
+		&__info {
+			width: 60%;
+			padding: 2rem;
+
+			& > * ~ * {
+				margin-top: 3rem;
+			}
+
+			@include md {
+				width: 100%;
+			}
+
+			@include sm {
+				& > * ~ * {
+					margin-top: 2rem;
+				}
+			}
+
+			&__btn,
+			&__desc,
+			&__title {
+				transform: translateY(-100px);
+				opacity: 0;
+				transition: transform 0.3s ease, opacity 0.3s ease;
+			}
+
+			&__title {
+				font-size: 5rem;
+				font-weight: 600;
+				transition-delay: 0.9s;
+
+				@include md {
+					font-size: 4rem;
+				}
+
+				@include sm {
+					font-size: 2rem;
+				}
+			}
+
+			&__desc {
+				font-size: 2rem;
+				line-height: 1.4;
+				transition-delay: 0.6s;
+
+				@include sm {
+					font-size: 1.5rem;
+				}
+			}
+
+			&__btn {
+				transition-delay: 0.3s;
+				pointer-events: auto;
+			}
+		}
+
+		&__img {
+			@include flex(center, center);
+
+			flex-grow: 1;
+			position: relative;
+			height: 100%;
+
+			.shape {
+				width: 400px;
+				height: 400px;
+				border-radius: 32% 68% 67% 33% / 42% 27% 73% 58%;
+				animation: border 8s ease infinite;
+
+				@include md {
+					width: 250px;
+					height: 250px;
+				}
+
+				@include sm {
+					width: 150px;
+					height: 150px;
+				}
+			}
+
+			img {
+				position: absolute;
+				z-index: 150;
+				height: 100%;
+				object-fit: contain;
+			}
+
+			@include md {
+				width: 100%;
+			}
+		}
+
+		&.active &__info__title,
+		&.active &__info__desc,
+		&.active &__info__btn {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+}
+
+@keyframes border {
+	0% {
+		border-radius: 32% 68% 67% 33% / 42% 27% 73% 58%;
+	}
+	50% {
+		border-radius: 61% 39% 19% 81% / 60% 58% 42% 40%;
+	}
+	100% {
+		border-radius: 32% 68% 67% 33% / 42% 27% 73% 58%;
+	}
+}

@@ -1,0 +1,29 @@
+@mixin flex($align-items: flex-start, $justify-content: flex-start) {
+	display: flex;
+	align-items: $align-items;
+	justify-content: $justify-content;
+}
+
+@mixin lg {
+	@media only screen and (max-width: $lg-width) {
+		@content;
+	}
+}
+
+@mixin md {
+	@media only screen and (max-width: $md-width) {
+		@content;
+	}
+}
+
+@mixin sm {
+	@media only screen and (max-width: $sm-width) {
+		@content;
+	}
+}
+
+@mixin canHover {
+	@media (hover: hover) {
+		@content;
+	}
+}

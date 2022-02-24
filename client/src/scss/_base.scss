@@ -1,0 +1,106 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
+}
+
+html {
+	font-size: 62.5%;
+}
+
+body {
+	font-family: 'Poppins', sans-serif;
+	font-size: 1.6rem;
+}
+
+a {
+	text-decoration: none;
+	color: unset;
+
+	&:hover {
+		color: $main-color;
+	}
+}
+
+img {
+	max-width: 100%;
+}
+
+u {
+	list-style-type: none;
+}
+
+@each $color, $val in $colors {
+	.color-#{$color} {
+		color: $val;
+	}
+}
+
+@each $color, $val in $colors {
+	.bg-#{$color} {
+		background-color: $val;
+	}
+}
+
+@each $var in $numbers {
+	.grid-col-#{$var} {
+		display: grid;
+		grid-template-columns: repeat($var, 1fr);
+	}
+}
+
+@each $var in $numbers {
+	.grid-col-md-#{$var} {
+		@include md {
+			grid-template-columns: repeat($var, 1fr);
+		}
+	}
+}
+
+@each $var in $numbers {
+	.grid-col-sm-#{$var} {
+		@include sm {
+			grid-template-columns: repeat($var, 1fr);
+		}
+	}
+}
+
+.grid {
+	display: grid;
+}
+
+.container {
+	width: 100%;
+	max-width: 1320px;
+	padding: 0 40px;
+	margin: 0 auto;
+
+	@include lg {
+		max-width: 1140px;
+		padding: 0 30px;
+	}
+	@include md {
+		max-width: 960px;
+		padding: 0 20px;
+	}
+	@include sm {
+		max-width: 720px;
+		padding: 0 10px;
+	}
+}
+
+.main {
+	min-height: 100vh;
+	margin-top: $header-height;
+
+	@include lg {
+		margin-top: $header-lg-height;
+	}
+	@include md {
+		margin-top: $header-md-height;
+	}
+	@include sm {
+		margin-top: $header-sm-height;
+	}
+}
