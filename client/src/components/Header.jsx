@@ -103,52 +103,52 @@ const Header = (props) => {
 							<Link to='/cart'>
 								<i className='bx bx-shopping-bag'></i>
 							</Link>
-							<div class='header__nav__cart__panel'>
-								{/* <div class='header__nav__cart__panel__empty'>
+							<div className='header__nav__cart__panel'>
+								{/* <div className='header__nav__cart__panel__empty'>
 									<img src={emptyCartImg} alt='Empty Cart' />
 								</div> */}
-								<div class='header__nav__cart__panel__product'>
-									<div class='header__nav__cart__panel__product__thumb'>
+								<div className='header__nav__cart__panel__product'>
+									<div className='header__nav__cart__panel__product__thumb'>
 										<img src={emptyCartImg} />
 									</div>
-									<div class='header__nav__cart__panel__product__name'>
+									<div className='header__nav__cart__panel__product__name'>
 										<p>
 											Sản phẩm 1 Lorem ipsum dolor sit amet
 											consectetur, adipisicing elit. Praesentium,
 											quibusdam.
 										</p>
 									</div>
-									<div class='header__nav__cart__panel__product__quantity'>
+									<div className='header__nav__cart__panel__product__quantity'>
 										2
 									</div>
 								</div>
-								<div class='header__nav__cart__panel__product'>
-									<div class='header__nav__cart__panel__product__thumb'>
+								<div className='header__nav__cart__panel__product'>
+									<div className='header__nav__cart__panel__product__thumb'>
 										<img src={emptyCartImg} />
 									</div>
-									<div class='header__nav__cart__panel__product__name'>
+									<div className='header__nav__cart__panel__product__name'>
 										<p>
 											Sản phẩm 1 Lorem ipsum dolor sit amet
 											consectetur, adipisicing elit. Praesentium,
 											quibusdam.
 										</p>
 									</div>
-									<div class='header__nav__cart__panel__product__quantity'>
+									<div className='header__nav__cart__panel__product__quantity'>
 										2
 									</div>
 								</div>
-								<div class='header__nav__cart__panel__product'>
-									<div class='header__nav__cart__panel__product__thumb'>
+								<div className='header__nav__cart__panel__product'>
+									<div className='header__nav__cart__panel__product__thumb'>
 										<img src={emptyCartImg} />
 									</div>
-									<div class='header__nav__cart__panel__product__name'>
+									<div className='header__nav__cart__panel__product__name'>
 										<p>
 											Sản phẩm 1 Lorem ipsum dolor sit amet
 											consectetur, adipisicing elit. Praesentium,
 											quibusdam.
 										</p>
 									</div>
-									<div class='header__nav__cart__panel__product__quantity'>
+									<div className='header__nav__cart__panel__product__quantity'>
 										2
 									</div>
 								</div>

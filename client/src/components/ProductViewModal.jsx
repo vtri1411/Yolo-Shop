@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import productData from '../assets/fake-data/products'
 
-import { remove } from '../redux/product-modal/productModalSlice'
+// import { remove } from '../redux/product-modal/productModalSlice'
 
 import ProductView from './ProductView'
 import Button from './Button'
@@ -11,15 +11,16 @@ import Button from './Button'
 const ProductViewModal = (props) => {
 	const dispatch = useDispatch()
 
-	const slug = useSelector(({ productModal }) => productModal.value)
-
-	const product = productData.getProductBySlug(slug)
+	const product = productData.getProductBySlug()
 
 	return (
 		<div className={`product-view__modal ${product ? 'active' : ''}`}>
 			<div className='product-view__modal__content'>
 				<div className='product-view__modal__content__btn'>
-					<Button size='sm' onClick={() => dispatch(remove())}>
+					<Button
+						size='sm'
+						// onClick={() => dispatch(remove())}
+					>
 						Đóng
 					</Button>
 				</div>

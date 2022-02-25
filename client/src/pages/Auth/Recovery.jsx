@@ -5,19 +5,18 @@ import { Link } from 'react-router-dom'
 
 import Input from '../../components/AuthForm/Input'
 import Button from '../../components/Button'
-import Footer from '../../components/Footer'
 import Helmet from '../../components/Helmet'
 import Marginer from '../../components/Marginer'
 
 import checkInput, { type } from '../../utilities/checkInput'
 
 const Recovery = () => {
-	const [emailOrPhone, setEmailOrPhone] = useState({ value: '', error: '' })
+	const [email, setEmail] = useState({ value: '', error: '' })
 
-	const handleBlurEmailOrPhone = useCallback(() => {
-		setEmailOrPhone({
-			...emailOrPhone,
-			error: checkInput(emailOrPhone.value, type.emailOrPhone),
+	const handleBlurEmail = useCallback(() => {
+		setEmail({
+			...email,
+			error: checkInput(email.value, type.EMAIL),
 		})
 	}, [])
 
@@ -37,15 +36,15 @@ const Recovery = () => {
 							type='text'
 							id='login-id'
 							placeholder='Email hoặc số điện thoại'
-							value={emailOrPhone.value}
-							error={emailOrPhone.error}
+							value={email.value}
+							error={email.error}
 							onChange={(e) =>
-								setEmailOrPhone({
-									...emailOrPhone,
+								setEmail({
+									...email,
 									value: e.target.value,
 								})
 							}
-							onBlur={handleBlurEmailOrPhone}
+							onBlur={handleBlurEmail}
 						/>
 					</div>
 					<Marginer margin='20px' />

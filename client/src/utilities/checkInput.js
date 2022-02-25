@@ -1,27 +1,22 @@
 export const type = {
-	emailOrPhone: 'EMAIL_OR_PHONE',
-	password: 'PASSWORD',
-	repassword: 'REPASSWORD',
+	EMAIL: 'EMAIL',
+	PASSWORD: 'PASSWORD',
+	REPASSWORD: 'REPASSWORD',
 }
 
 export default function (value, typeCheck, repassword) {
 	console.log({ value })
 	switch (typeCheck) {
-		case type.emailOrPhone:
-			if (/^[\d]+$/.test(value)) {
-				if (value.length === 10) return ''
-				return 'Số điện thoại phải là 10 chữ số !'
-			}
-
+		case type.EMAIL:
 			if (/\w+@\w+\.\w+/.test(value)) {
 				return ''
 			} else {
-				return 'Vui lòng nhập email không hợp lệ !'
+				return 'Vui lòng nhập email hợp lệ !'
 			}
-		case type.password:
+		case type.PASSWORD:
 			if (value.length < 6) return 'Vui lòng nhập mật khẩu ít nhất 6 ký tự !'
 			return ''
-		case type.repassword:
+		case type.REPASSWORD:
 			if (value === repassword) return ''
 			else return 'Mật khẩu nhập lại không đúng !'
 	}

@@ -3,27 +3,26 @@ import { Link } from 'react-router-dom'
 
 import Input from '../../components/AuthForm/Input'
 import Button from '../../components/Button'
-import Footer from '../../components/Footer'
 import Helmet from '../../components/Helmet'
 import Marginer from '../../components/Marginer'
 
 import checkInput, { type } from '../../utilities/checkInput'
 
 const Login = () => {
-	const [emailOrPhone, setEmailOrPhone] = useState({ value: '', error: '' })
+	const [email, setEmail] = useState({ value: '', error: '' })
 	const [password, setPassword] = useState({ value: '', error: '' })
 
-	const handleBlurEmailOrPhone = useCallback(() => {
+	const handleBlurEmail = useCallback(() => {
 		setEmailOrPhone({
-			...emailOrPhone,
-			error: checkInput(emailOrPhone.value, type.emailOrPhone),
+			...email,
+			error: checkInput(email.value, type.EMAIL),
 		})
-	}, [emailOrPhone.value, emailOrPhone.error])
+	}, [email.value, email.error])
 
 	const handleBlurPassword = useCallback(() => {
 		setPassword({
 			...password,
-			error: checkInput(password.value, type.password),
+			error: checkInput(password.value, type.PASSWORD),
 		})
 	}, [password.value, password.error])
 
@@ -43,15 +42,15 @@ const Login = () => {
 							type='text'
 							id='login-id'
 							placeholder='Email hoặc số điện thoại'
-							value={emailOrPhone.value}
-							error={emailOrPhone.error}
+							value={email.value}
+							error={email.error}
 							onChange={(e) =>
-								setEmailOrPhone({
+								setEmail({
 									...emailOrPhone,
 									value: e.target.value,
 								})
 							}
-							onBlur={handleBlurEmailOrPhone}
+							onBlur={handleBlurEmail}
 						/>
 					</div>
 					<div className='auth__form__group'>
@@ -89,10 +88,32 @@ const Login = () => {
 						</Link>
 					</div>
 				</div>
-				<div className='auth__oauth3rd'></div>
+				<div className='auth__oauth'>
+					<a href={getGoogleOAuthUrl()}>Google oauth</a>
+				</div>
 			</div>
 		</Helmet>
 	)
 }
 
 export default Login
+
+const getGoogleOAuthUrl = () => {
+	const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
+
+	const options = {
+		client_id:
+			'1082897750063-htja233etc5m6lvaq3fq6sk9c38oeqas.apps.googleusercontent.com',
+		redirect_uri: 'http://localhost:3000/oauth',
+		response_type: 'token',
+		scope: [
+			'https://www.googleapis.com/auth/userinfo.profile',
+			'https://www.googleapis.com/auth/userinfo.email',
+		].join(' '),
+		prompt: 'consent',
+	}
+
+	const qs = new URLSearchParams(options)
+
+	return `${rootUrl}?${qs.toString()}`
+}

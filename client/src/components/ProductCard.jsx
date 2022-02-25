@@ -3,14 +3,14 @@ import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-import { set } from '../redux/product-modal/productModalSlice'
+// import { set } from '../redux/product-modal/productModalSlice'
 
 import Button from './Button'
 
 const ProductCard = (props) => {
 	const dispatch = useDispatch()
 	const buyProduct = () => {
-		dispatch(set(props.slug))
+		// dispatch(set(props.slug))
 	}
 
 	return (
@@ -57,7 +57,7 @@ ProductCard.propTypes = {
 	image01: PropTypes.string,
 	image02: PropTypes.string,
 	price: PropTypes.string.isRequired,
-	slug: PropTypes.string.isRequired
+	slug: PropTypes.string.isRequired,
 }
 
 export default ProductCard

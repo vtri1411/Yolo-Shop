@@ -1,3 +1,8 @@
+/**
+ * Used for checkout
+ * Format the aggregation result, and check if any product
+ *    doesn't satisfy required condition, return is Correct = false
+ */
 module.exports = function (array) {
 	const newArray = []
 

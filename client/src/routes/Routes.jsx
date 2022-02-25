@@ -9,12 +9,14 @@ import NotFound from '../pages/NotFound'
 import Login from '../pages/Auth/Login'
 import Register from '../pages/Auth/Register'
 import Recovery from '../pages/Auth/Recovery'
+import OAuth from '../pages/OAuth'
 
 const Routes = () => {
 	return (
 		<Switch>
 			<Route path='/' exact component={Home} />
 			<Route path='/login' exact component={Login} />
+			<Route path='/oauth' exact component={OAuth} />
 			<Route path='/register' exact component={Register} />
 			<Route path='/recovery' exact component={Recovery} />
 			<Route path='/catalog' exact component={Catalog} />

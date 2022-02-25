@@ -8,6 +8,7 @@ const auth = (req, res, next) => {
 		next()
 	} catch (error) {
 		console.log(error)
+		res.cookie('jwt', '', { maxAge: 1, httpOnly: true })
 		res.sendStatus(401)
 	}
 }

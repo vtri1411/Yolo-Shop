@@ -6,6 +6,20 @@ const Types = require('mongoose').Types
 const auth = require('../middlewares/auth')
 const formatResult_GetIsCorrect = require('../utilities/formatResult_GetIsCorrect')
 
+// @route   GET api/order/:id
+// @desc    GET user's order
+// @access  Private
+router.get('/:id', async (req, res) => {
+	try {
+		const { id } = req.params
+		const orders = await Order.find({ userId: Types.ObjectId(id) })
+		res.json({ orders })
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
 // @route   POST api/order
 // @desc    Checkout products
 // @access  Private
