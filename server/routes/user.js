@@ -1,17 +1,17 @@
-const express = require('express')
-const router = express.Router()
+// const express = require('express')
+// const router = express.Router()
+const router = require('express').Router()
 const User = require('../models/user')
 const UserVerification = require('../models/userVerification')
 const UserRecovery = require('../models/userRecovery')
 const bcryptjs = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 const setAuthCooki = require('../utilities/setAuthCooki')
 const { v4: uuidv4 } = require('uuid')
-const sendEmail = require('../utilities/sendMail')
 const { Types } = require('mongoose')
 const constants = require('../config/constants')
-const sendMailVerificationSecretString = require('../utilities/sendMailVerificationSecretString')
+const sendVerificationMail = require('../utilities/sendVerificationMail')
 const sendMailRecoverySecretString = require('../utilities/sendMailRecoverySecretString')
+const createAndHashSecretString = require('../utilities/createAndHashSecretString')
 
 // @route   POST api/user
 // @desc    Create a new user
@@ -24,9 +24,10 @@ router.post('/', async (req, res) => {
 
 		// Check if user exist
 		if (user) {
-			return res
-				.status(400)
-				.json({ status: 'FAIL', message: 'User has already existed' })
+			return res.json({
+				status: 'FAIL',
+				message: 'Tài khoản đã tồn tại!',
+			})
 		}
 
 		// Create hashPassword and user
@@ -57,15 +58,58 @@ router.post('/', async (req, res) => {
 		promises.push(verificationUser.save())
 
 		// Send email to user
-		promises.push(
-			sendMailVerificationSecretString(user._id, email, secretString)
-		)
+		promises.push(sendVerificationMail(user._id, email, secretString))
 
 		// Wait for saving user, verification user, sending email
 		await Promise.all(promises)
 
 		// Response the user
-		res.json({ status: 'SUCCESS', message: 'Register a new user success' })
+		res.json({ status: 'SUCCESS', message: 'Đăng ký tài khoản thành công!' })
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   POST api/user/verification/resend
+// @desc    Re send verified mail
+// @access  Public
+router.post('/verification/resend', async (req, res) => {
+	try {
+		const { email } = req.body
+
+		const user = await User.findOne({ email })
+
+		// If user is not exist
+		if (!user) {
+			return res.json({
+				status: 'FAIL',
+				code: '001',
+				message: 'Email không tồn tại trong hệ thống!',
+			})
+		}
+
+		// Delete all verified record of this user
+		await UserVerification.deleteMany({ userId: user._id })
+
+		const { hashString, secretString } = createAndHashSecretString(user._id)
+
+		// Save secret string hashed to database
+		const userVerification = new UserVerification({
+			userId: user._id,
+			expiredDate:
+				Date.now() + Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
+			secretString: hashString,
+		})
+
+		await Promise.all([
+			sendVerificationMail(user._id, email, secretString),
+			userVerification.save(),
+		])
+
+		res.json({
+			status: 'SUCCESS',
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
@@ -83,9 +127,9 @@ router.get('/verification/:id/:string', async (req, res) => {
 		// If user not exists, or has been verified
 		//    response code 400
 		if (!user || user.verify) {
-			return res.status(400).json({
+			return res.json({
 				status: 'FAIL',
-				message: 'User is not exist or has been verified',
+				message: 'Tài khoản không tồn tại hoặc đã được xác minh!',
 			})
 		}
 
@@ -97,9 +141,7 @@ router.get('/verification/:id/:string', async (req, res) => {
 		// Check if verification is expired
 		if (Date.now() > userVerification.expiredDate) {
 			// @TODO Do something when user verification expired
-			return res
-				.status(400)
-				.json({ status: 'FAIL', message: 'Verification is expired' })
+			return res.json({ status: 'FAIL', message: 'Xác nhận đã hết hạn!' })
 		}
 
 		// Compare user's input string with verification string from database
@@ -113,10 +155,10 @@ router.get('/verification/:id/:string', async (req, res) => {
 
 			setAuthCooki(res, id)
 
-			return res.redirect(`http://localhost:3000`)
+			return res.redirect(constants.ROOT_UI_URL)
 		} else {
 			// If the comparasion is not corrects
-			res.status(400).json({
+			return res.json({
 				status: 'FAIL',
 				message:
 					'Comparison failed, unique string is not equal with hash string!',
@@ -128,8 +170,8 @@ router.get('/verification/:id/:string', async (req, res) => {
 	}
 })
 
-// @route   POST api/user/recovery
-// @desc    Recovery password
+// @route   POST api/user/recovery/request
+// @desc    Request reset password
 // @access  Public
 router.post('/recovery/request', async (req, res) => {
 	try {
@@ -138,7 +180,7 @@ router.post('/recovery/request', async (req, res) => {
 		const promises = []
 
 		if (!user || !user.verified) {
-			res.status(400).json({
+			return res.json({
 				status: 'FAIL',
 				message:
 					'Email is not exist on the database or has not been verified!',
@@ -193,19 +235,19 @@ router.post('/recovery/reset', async (req, res) => {
 		const userRecovery = await UserRecovery.findOne({ userId })
 
 		if (!userRecovery) {
-			return res.status(400).json({
+			return res.json({
 				status: 'FAIL',
 				message: 'User id is not match with any record of user recovery!',
 			})
 		}
 
-		console.log(new Date(userRecovery.expiredDate).toUTCString())
-
 		if (Date.now() > userRecovery.expiredDate) {
 			await UserRecovery.deleteOne({ userId })
-			return res.status(400).json({
+			return res.json({
 				status: 'FAIL',
-				message: 'User recovery record is expired',
+				message:
+					'Link khôi phục mật khẩu của bạn đã hết hạn, vui lòng tạo lại !',
+				code: '004',
 			})
 		}
 
@@ -220,8 +262,6 @@ router.post('/recovery/reset', async (req, res) => {
 				{ new: true, projection: { password: -1 } }
 			)
 
-			console.log({ user })
-
 			// Create and set jwt cooki
 			setAuthCooki(res, userId)
 
@@ -231,10 +271,9 @@ router.post('/recovery/reset', async (req, res) => {
 				payload: user,
 			})
 		} else {
-			res.status(500).json({
+			res.json({
 				status: 'FAIL',
-				message:
-					'There is an error when bcrypt is comparing two secret string !',
+				message: 'Vui lòng vào link của mail mới nhất !',
 			})
 		}
 	} catch (error) {

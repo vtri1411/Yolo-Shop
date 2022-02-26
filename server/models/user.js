@@ -23,6 +23,9 @@ const userSchema = new Schema({
 		type: Boolean,
 		required: true,
 	},
+	avatar: {
+		type: String,
+	},
 	cart: [
 		{
 			productId: {

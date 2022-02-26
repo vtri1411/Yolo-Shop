@@ -8,11 +8,13 @@ const Input = ({
 	value,
 	onChange,
 	onBlur,
-	...props
+	id,
+	key,
 }) => {
 	return (
-		<div {...props} className={`input ${className ? className : ''}`}>
+		<div key={key} className={`input ${className ? className : ''}`}>
 			<input
+				id={id}
 				type={type}
 				value={value}
 				placeholder={placeholder}

@@ -6,6 +6,7 @@ const bcryptjs = require('bcryptjs')
 const setAuthCooki = require('../utilities/setAuthCooki')
 const { checkIsEmail } = require('../utilities/validator')
 const axios = require('axios')
+const constant = require('../config/constants')
 
 // @route   GET api/auth
 // @desc    Get user account
@@ -19,43 +20,83 @@ router.get('/', auth, async (req, res) => {
 			res.cookie('jwt', '', { maxAge: 0, httpOnly: true })
 		}
 
-		res.json({ user })
+		res.json({
+			status: 'SUCCESS',
+			message: 'Get user success!',
+			payload: user,
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
 	}
 })
 
-// @route   POST api/auth
+// @route   POST api/auth/login
 // @desc    Login a user
 // @access  Public
-router.post('/', async (req, res) => {
+router.post('/login', async (req, res) => {
 	try {
 		const { email, password } = req.body
 
 		if (!email || !checkIsEmail(email)) {
-			return res.status(400).send('Invalid email!')
+			return res.json({
+				status: 'FAIL',
+				code: 001,
+				message: 'Email không hợp lệ!',
+			})
 		}
 
 		const user = await User.findOne({ email })
 
 		if (!user) {
-			return res.status(400).send('Email not exist!')
+			return res.json({
+				status: 'FAIL',
+				code: '001',
+				message: 'Email không tồn tại!',
+			})
 		}
 
-		const isCorrectPassword = await bcryptjs.compare(password, user.password)
-
-		if (!isCorrectPassword) {
-			return res.status(400).send('Incorrect password')
+		if (!bcryptjs.compareSync(password, user.password)) {
+			return res.json({
+				status: 'FAIL',
+				code: '002',
+				message: 'Mật khẩu không đúng!',
+			})
 		}
 
 		if (user.verified === false) {
-			return res.json({ error: 'Unverified' })
+			return res.json({
+				status: 'FAIL',
+				code: '003',
+				message: 'Email chưa được xác minh!',
+			})
 		}
 
 		setAuthCooki(res, user._id)
+
 		delete user._doc.password
-		res.json({ user: user._doc })
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Đăng nhập thành công!',
+			payload: user,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   GET api/auth/logout
+// @desc    Logout a user
+// @access  Public
+router.get('/logout', (req, res) => {
+	try {
+		res.cookie('jwt', '', { maxAge: 0, httpOnly: true })
+		res.json({
+			status: 'SUCCESS',
+			message: 'Logout user and delete cooki successfully!',
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
@@ -69,6 +110,7 @@ router.post('/oauth/google', async (req, res) => {
 	try {
 		const { access_token } = req.body
 
+		// Get user data from google api
 		const { data } = await axios.get(
 			`https://www.googleapis.com/oauth2/v1/userinfo?alt=json`,
 			/**
@@ -93,7 +135,12 @@ router.post('/oauth/google', async (req, res) => {
 		}
 
 		setAuthCooki(res, user._id)
-		res.json({ user })
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Đăng nhập bằng google thành công!',
+			payload: user,
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)

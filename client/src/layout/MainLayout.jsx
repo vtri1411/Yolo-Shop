@@ -1,11 +1,13 @@
 import React from 'react'
-
 import { BrowserRouter, Route } from 'react-router-dom'
+
+import Routes from '../routes/Routes'
+
+import { ToastContainer } from 'react-toastify'
+
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import ProductViewModal from '../components/ProductViewModal'
-
-import Routes from '../routes/Routes'
 import Maginer from '../components/Marginer'
 
 const MainLayOut = () => {
@@ -23,6 +25,10 @@ const MainLayOut = () => {
 						<Maginer margin={40} />
 						<Footer />
 						<ProductViewModal />
+						<ToastContainer
+							theme='dark'
+							position='top-center'
+						/>
 					</>
 				)}
 			/>

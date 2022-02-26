@@ -1,29 +1,25 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
-const Quantity = (props) => {
+const Quantity = ({ handleChangeQuantity, quantity, size }) => {
 	return (
 		<div className='quantity'>
 			<div
-				className='quantity__btn'
-				onClick={() => props.handleChangeQuantity('-', 1)}
+				className={`quantity__btn ${size === 'sm' ? 'sm' : ''}`}
+				onClick={() => handleChangeQuantity('-', 1)}
 			>
 				<i className='bx bx-minus'></i>
 			</div>
-			<div className='quantity__input'>{props.quantity}</div>
+			<div className={`quantity__input ${size === 'sm' ? 'sm' : ''}`}>
+				{quantity}
+			</div>
 			<div
-				className='quantity__btn'
-				onClick={() => props.handleChangeQuantity('+', 1)}
+				className={`quantity__btn ${size === 'sm' ? 'sm' : ''}`}
+				onClick={() => handleChangeQuantity('+', 1)}
 			>
 				<i className='bx bx-plus'></i>
 			</div>
 		</div>
 	)
-}
-
-Quantity.propTypes = {
-	handleChangeQuantity: PropTypes.func.isRequired,
-	quantity: PropTypes.number.isRequired
 }
 
 export default Quantity

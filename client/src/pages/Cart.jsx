@@ -4,8 +4,6 @@ import Button from '../components/Button'
 import CartItem from '../components/CartItem'
 
 const Cart = () => {
-	const cartProducts = useSelector((state) => state.shoppingCart.value)
-
 	return (
 		<div className='cart'>
 			<div className='cart__info'>
@@ -23,9 +21,7 @@ const Cart = () => {
 					<Button>Tiếp tục mua hàng</Button>
 				</div>
 			</div>
-			<div className='cart__list'>
-				
-			</div>
+			<div className='cart__list'></div>
 		</div>
 	)
 }

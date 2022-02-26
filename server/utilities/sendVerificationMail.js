@@ -3,7 +3,7 @@ const sendEmail = require('./sendMail.js')
 const constants = require('../config/constants')
 const { v4: uuidv4 } = require('uuid')
 
-const sendVerificationSecretString = async (userId, email, secretString) => {
+const sendVerificationMail = async (userId, email, secretString) => {
 	// Send email to the user
 	const link = `${constants.ROOT_SERVER_URL}/api/user/verification/${userId}/${secretString}`
 
@@ -22,4 +22,4 @@ const sendVerificationSecretString = async (userId, email, secretString) => {
 	}
 }
 
-module.exports = sendVerificationSecretString
+module.exports = sendVerificationMail

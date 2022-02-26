@@ -4,14 +4,14 @@ import PropTypes from 'prop-types'
 const Helmet = (props) => {
 	useEffect(() => {
 		window.scrollTo(0, 0)
-		document.title = 'Yolo -' + props.title
+		document.title = 'Yolo - ' + props.title
 	}, [props.title])
 
 	return props.children
 }
 
 Helmet.propTypes = {
-	title: PropTypes.string.isRequired
+	title: PropTypes.string.isRequired,
 }
 
 export default Helmet

@@ -1,64 +1,78 @@
-import React from 'react'
-import { useCallback } from 'react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, {  useCallback, useState } from 'react'
+import { useHistory, Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 
-import Input from '../../components/AuthForm/Input'
-import Button from '../../components/Button'
+import checkInput, { TYPE } from '../../utilities/validateInput'
+
+import { requestResetPassword } from '../../redux/user/user.actions'
+
+import { toast } from 'react-toastify'
+
 import Helmet from '../../components/Helmet'
+import AuthContainer from '../../components/Auth/AuthContainer'
+import AuthFormGroup from '../../components/Auth/AuthFormGroup'
+import AuthForm from '../../components/Auth/AuthForm'
+import Button from '../../components/Button'
 import Marginer from '../../components/Marginer'
 
-import checkInput, { type } from '../../utilities/checkInput'
-
 const Recovery = () => {
+	const history = useHistory()
+
+	const dispatch = useDispatch()
+
 	const [email, setEmail] = useState({ value: '', error: '' })
 
-	const handleBlurEmail = useCallback(() => {
+	const validateEmail = useCallback(() => {
 		setEmail({
 			...email,
-			error: checkInput(email.value, type.EMAIL),
+			error: checkInput(email.value, TYPE.EMAIL),
 		})
-	}, [])
+	}, [email.value])
+
+	const handleRequestResetPassword = (e) => {
+		e.preventDefault()
+
+		if (!!validateEmail()) {
+			return toast.error('Vui lòng nhập đầy đủ thông tin hợp lệ !')
+		}
+
+		dispatch(
+			requestResetPassword({
+				email: email.value,
+				redirectUrl: 'http://localhost:3000/recovery/reset',
+			})
+		)
+	}
 
 	return (
-		<Helmet title='Đăng nhập'>
-			<div className='auth'>
-				<h3 className='auth__title'>Khôi phục mật khẩu</h3>
-				<form className='auth__form'>
-					<div className='auth__form__group'>
-						<label
-							htmlFor='login-id'
-							className='auth__form__group__label'
-						>
-							Nhập email hoặc số điện thoại để khôi phục mật khẩu
-						</label>
-						<Input
-							type='text'
-							id='login-id'
-							placeholder='Email hoặc số điện thoại'
-							value={email.value}
-							error={email.error}
-							onChange={(e) =>
-								setEmail({
-									...email,
-									value: e.target.value,
-								})
-							}
-							onBlur={handleBlurEmail}
-						/>
-					</div>
-					<Marginer margin='20px' />
-					<Button>Lấy lại mật khẩu</Button>
-				</form>
-				<div className='auth__option'>
-					<div className='auth__option'>
-						<Link to='/login' className='auth__option__link'>
+		<Helmet title='Quên mật khẩu'>
+			<AuthContainer title={'Quên mật khẩu'}>
+				<AuthForm onSubmit={handleRequestResetPassword}>
+					<AuthFormGroup
+						type={'text'}
+						value={email.value}
+						error={email.error}
+						labelText={'Email'}
+						onChange={(e) =>
+							setEmail({ ...email, value: e.target.value })
+						}
+						onBlur={validateEmail}
+						placeholder='Nhập email của bạn'
+					/>
+
+					<Marginer margin={20} />
+
+					<Button>Đặt lại mật khẩu</Button>
+				</AuthForm>
+
+				<div className='auth__link'>
+					<div className='auth__link__item'>
+						<Link to='/login' className='auth__link__item__link'>
 							Quay lại đăng nhập
 						</Link>
 					</div>
 				</div>
-				<div className='auth__oauth3rd'></div>
-			</div>
+			</AuthContainer>
 		</Helmet>
 	)
 }

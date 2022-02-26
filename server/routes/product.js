@@ -8,7 +8,11 @@ const Product = require('../models/product')
 router.get('/', async (req, res) => {
 	try {
 		const products = await Product.find()
-		res.json({ products })
+		res.json({
+			status: 'SUCCESS',
+			message: 'Lấy danh sách sản phẩm thành công!',
+			payload: products,
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
@@ -21,7 +25,11 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
 	try {
 		const product = Product.findById(req.params.id)
-		res.json({ product })
+		res.json({
+			status: 'SUCCESS',
+			message: 'Lấy thông tin chi tiết của sản phẩm thành công!',
+			payload: product,
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
@@ -53,8 +61,14 @@ router.post('/', async (req, res) => {
 			description,
 			inventory,
 		})
+
 		await product.save()
-		res.json({ product })
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Thêm sản phẩm thành công!',
+			payload: product,
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)

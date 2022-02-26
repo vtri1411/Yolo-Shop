@@ -1,34 +1,26 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
-const Maginer = (props) => {
-	if (props.direction === 'vertical') {
-		return (
-			<div
-				style={{
-					height: '100%',
-					width: `${
-						typeof props.margin === 'number'
-							? `${props.margin}px`
-							: props.margin
-					}`,
-				}}
-			></div>
-		)
+const Maginer = ({ direction, margin }) => {
+	const style = {}
+	let formatedMargin = 0
+
+	if (typeof margin === 'number') {
+		formatedMargin = `${margin}px`
+	} else if (typeof margin === 'string') {
+		formatedMargin = margin
 	} else {
-		return (
-			<div
-				style={{
-					width: '100%',
-					height: `${
-						typeof props.margin === 'number'
-							? `${props.margin}px`
-							: props.margin
-					}`,
-				}}
-			></div>
-		)
+		formatedMargin = '20px'
 	}
+
+	if (direction === 'vertical') {
+		style.width = formatedMargin
+		style.height = '100%'
+	} else {
+		style.height = formatedMargin
+		style.width = '100%'
+	}
+
+	return <div style={style}></div>
 }
 
 export default Maginer

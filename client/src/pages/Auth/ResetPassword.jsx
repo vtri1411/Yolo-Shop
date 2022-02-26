@@ -1,37 +1,33 @@
-import React, { useEffect, useCallback, useState } from 'react'
-import { useHistory, Link } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useHistory, useParams } from 'react-router-dom'
 
 import validateInput, { TYPE } from '../../utilities/validateInput'
 
-import { registerUser } from '../../redux/user/user.actions'
-
 import { toast } from 'react-toastify'
 
-import Helmet from '../../components/Helmet'
 import AuthContainer from '../../components/Auth/AuthContainer'
 import AuthFormGroup from '../../components/Auth/AuthFormGroup'
 import AuthForm from '../../components/Auth/AuthForm'
 import Button from '../../components/Button'
+import Helmet from '../../components/Helmet'
 import Marginer from '../../components/Marginer'
+import { resetPassword } from '../../redux/user/user.actions'
 
-const Register = () => {
-	const history = useHistory()
+const mapState = ({ user }) => ({ user: user.user })
 
+const ResetPassword = () => {
 	const dispatch = useDispatch()
 
-	const [email, setEmail] = useState({ value: '', error: '' })
+	const history = useHistory()
+
+	const { userId, secretString } = useParams()
+
+	const { user } = useSelector(mapState)
+
 	const [password, setPassword] = useState({ value: '', error: '' })
 	const [rePassword, setRePassword] = useState({ value: '', error: '' })
-
-	const validateEmail = useCallback(() => {
-		const error = validateInput(email.value, TYPE.EMAIL)
-		setEmail({
-			...email,
-			error,
-		})
-		return error
-	}, [email.value])
+	const [isLoading, setIsLoading] = useState(false)
 
 	const validatePassword = useCallback(() => {
 		const error = validateInput(password.value, TYPE.PASSWORD)
@@ -55,18 +51,20 @@ const Register = () => {
 		return error
 	}, [rePassword.value, password.value])
 
-	const handleRegister = (e) => {
+	const handleResetPassword = (e) => {
 		e.preventDefault()
 
-		if (!!validateEmail() | !!validatePassword() | !!validateRePassword()) {
+		if (!!validatePassword() | !!validateRePassword()) {
 			return toast.error('Vui lòng nhập đầy đủ thông tin hợp lệ !')
 		}
 
 		dispatch(
-			registerUser({ email: email.value, password: password.value }, history)
+			resetPassword(
+				{ userId, newPassword: password.value, secretString },
+				history
+			)
 		)
 	}
-
 	useEffect(() => {
 		if (!password.error && password.value !== '' && rePassword.value !== '') {
 			validateRePassword()
@@ -74,66 +72,39 @@ const Register = () => {
 	}, [password.error, rePassword.value, password.value])
 
 	return (
-		<Helmet title='Đăng ký'>
-			<AuthContainer title={'Đăng ký'}>
-				<AuthForm onSubmit={handleRegister}>
-					<AuthFormGroup
-						type={'text'}
-						value={email.value}
-						error={email.error}
-						labelText={'Email'}
-						onChange={(e) =>
-							setEmail({ ...email, value: e.target.value })
-						}
-						onBlur={validateEmail}
-						placeholder='Nhập email của bạn'
-					/>
+		<Helmet title='Đặt lại mật khẩu'>
+			<AuthContainer title={'Đặt lại mật khẩu'}>
+				<AuthForm onSubmit={handleResetPassword}>
 					<AuthFormGroup
 						type={'password'}
 						value={password.value}
 						error={password.error}
-						labelText={'Mật khẩu'}
+						labelText={'Mật khẩu mới'}
 						onChange={(e) =>
 							setPassword({ ...password, value: e.target.value })
 						}
 						onBlur={validatePassword}
-						placeholder='Nhập mật khẩu của bạn'
+						placeholder='Nhập mật khẩu mới'
 					/>
 					<AuthFormGroup
 						type={'password'}
 						value={rePassword.value}
 						error={rePassword.error}
-						labelText={'Nhập lại mật khẩu'}
+						labelText={'Nhập lại mật khẩu mới'}
 						onChange={(e) =>
 							setRePassword({ ...rePassword, value: e.target.value })
 						}
 						onBlur={validateRePassword}
-						placeholder='Nhập lại mật khẩu của bạn'
+						placeholder='Nhập lại mật khẩu mới'
 					/>
 
 					<Marginer margin={20} />
 
-					<Button>Đăng ký</Button>
+					<Button>Xác nhận</Button>
 				</AuthForm>
-
-				<div className='auth__link'>
-					<div className='auth__link__item'>
-						<Link to='/recovery' className='auth__link__item__link'>
-							Quên mật khẩu
-						</Link>
-					</div>
-					<div className='auth__link__item'>
-						<span className='auth__link__item__text'>
-							Đã có tài khoản?
-						</span>
-						<Link to='/register' className='auth__link__item__link'>
-							Đăng nhập
-						</Link>
-					</div>
-				</div>
 			</AuthContainer>
 		</Helmet>
 	)
 }
 
-export default Register
+export default ResetPassword

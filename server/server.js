@@ -24,10 +24,15 @@ app.use(function (req, res, next) {
 app.use(express.json())
 app.use(cookieParser())
 
+// Routes
 app.use('/api/user', require('./routes/user'))
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/product', require('./routes/product'))
 app.use('/api/order', require('./routes/order'))
+app.use('/api/brand', require('./routes/brand'))
+app.use('/api/color', require('./routes/color'))
+app.use('/api/size', require('./routes/size'))
+app.use('/api/category', require('./routes/category'))
 
 const PORT = process.env.PORT || 5000
 

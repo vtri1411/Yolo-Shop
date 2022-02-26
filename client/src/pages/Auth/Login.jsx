@@ -1,119 +1,121 @@
-import React, { useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useCallback, useState } from 'react'
+import { useHistory, Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 
-import Input from '../../components/AuthForm/Input'
-import Button from '../../components/Button'
+import googleLoginImg from '../../assets/images/btn_google_login.png'
+
+import validateInput, { TYPE } from '../../utilities/validateInput'
+import googleOauthUrl from '../../utilities/googleOauthUrl'
+
+import { loginUser } from '../../redux/user/user.actions'
+
+import { toast } from 'react-toastify'
+
 import Helmet from '../../components/Helmet'
+import AuthContainer from '../../components/Auth/AuthContainer'
+import AuthFormGroup from '../../components/Auth/AuthFormGroup'
+import AuthForm from '../../components/Auth/AuthForm'
+import Button from '../../components/Button'
 import Marginer from '../../components/Marginer'
 
-import checkInput, { type } from '../../utilities/checkInput'
-
 const Login = () => {
+	const history = useHistory()
+
+	const dispatch = useDispatch()
+
 	const [email, setEmail] = useState({ value: '', error: '' })
 	const [password, setPassword] = useState({ value: '', error: '' })
 
-	const handleBlurEmail = useCallback(() => {
-		setEmailOrPhone({
+	const validateEmail = useCallback(() => {
+		const error = validateInput(email.value, TYPE.EMAIL)
+		setEmail({
 			...email,
-			error: checkInput(email.value, type.EMAIL),
+			error,
 		})
-	}, [email.value, email.error])
+		return error
+	}, [email.value])
 
-	const handleBlurPassword = useCallback(() => {
+	const validatePassword = useCallback(() => {
+		const error = validateInput(password.value, TYPE.PASSWORD)
 		setPassword({
 			...password,
-			error: checkInput(password.value, type.PASSWORD),
+			error,
 		})
-	}, [password.value, password.error])
+		return error
+	}, [password.value])
+
+	const handleLogin = (e) => {
+		e.preventDefault()
+
+		if (!!validateEmail() | !!validatePassword()) {
+			return toast.error('Vui lòng nhập đầy đủ thông tin !')
+		}
+
+		dispatch(
+			loginUser({ email: email.value, password: password.value }, history)
+		)
+	}
 
 	return (
 		<Helmet title='Đăng nhập'>
-			<div className='auth'>
-				<h3 className='auth__title'>Đăng nhập</h3>
-				<form className='auth__form'>
-					<div className='auth__form__group'>
-						<label
-							htmlFor='login-id'
-							className='auth__form__group__label'
-						>
-							Email hoặc số điện thoại
-						</label>
-						<Input
-							type='text'
-							id='login-id'
-							placeholder='Email hoặc số điện thoại'
-							value={email.value}
-							error={email.error}
-							onChange={(e) =>
-								setEmail({
-									...emailOrPhone,
-									value: e.target.value,
-								})
-							}
-							onBlur={handleBlurEmail}
-						/>
-					</div>
-					<div className='auth__form__group'>
-						<label
-							htmlFor='login-password'
-							className='auth__form__group__label'
-						>
-							Mật khẩu
-						</label>
-						<Input
-							type='password'
-							id='login-password'
-							placeholder='Mật khẩu'
-							value={password.value}
-							error={password.error}
-							onChange={(e) =>
-								setPassword({ ...password, value: e.target.value })
-							}
-							onBlur={handleBlurPassword}
-						/>
-					</div>
-					<Marginer margin='20px' />
+			<AuthContainer title={'Đăng nhập'}>
+				<AuthForm onSubmit={handleLogin}>
+					<AuthFormGroup
+						type={'text'}
+						value={email.value}
+						error={email.error}
+						labelText={'Email'}
+						onChange={(e) =>
+							setEmail({ ...email, value: e.target.value })
+						}
+						onBlur={validateEmail}
+						placeholder='Nhập email của bạn'
+						id={'login-email'}
+					/>
+					<AuthFormGroup
+						type={'password'}
+						value={password.value}
+						error={password.error}
+						labelText={'Mật khẩu'}
+						onChange={(e) =>
+							setPassword({ ...password, value: e.target.value })
+						}
+						onBlur={validatePassword}
+						placeholder='Nhập mật khẩu của bạn'
+						id='login-password'
+					/>
+
+					<Marginer margin={20} />
+
 					<Button>Đăng nhập</Button>
-				</form>
-				<div className='auth__option'>
-					<div className='auth__option'>
-						<Link to='/recovery' className='auth__option__link'>
+				</AuthForm>
+
+				{/* <AuthError error={loginError} /> */}
+
+				<div className='auth__link'>
+					<div className='auth__link__item'>
+						<Link to='/recovery' className='auth__link__item__link'>
 							Quên mật khẩu
 						</Link>
 					</div>
-					<div className='auth__option'>
-						<span className='auth__option__text'>Chưa có tài khoản?</span>
-						<Link to='/register' className='auth__option__link'>
-							Đăng ký
+					<div className='auth__link__item'>
+						<span className='auth__link__item__text'>
+							Đã có tài khoản?
+						</span>
+						<Link to='/register' className='auth__link__item__link'>
+							Đăng nhập
 						</Link>
 					</div>
 				</div>
+
 				<div className='auth__oauth'>
-					<a href={getGoogleOAuthUrl()}>Google oauth</a>
+					<a className='auth__oauth__item' href={googleOauthUrl}>
+						<img src={googleLoginImg} alt='Login with google' />
+					</a>
 				</div>
-			</div>
+			</AuthContainer>
 		</Helmet>
 	)
 }
 
 export default Login
-
-const getGoogleOAuthUrl = () => {
-	const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
-
-	const options = {
-		client_id:
-			'1082897750063-htja233etc5m6lvaq3fq6sk9c38oeqas.apps.googleusercontent.com',
-		redirect_uri: 'http://localhost:3000/oauth',
-		response_type: 'token',
-		scope: [
-			'https://www.googleapis.com/auth/userinfo.profile',
-			'https://www.googleapis.com/auth/userinfo.email',
-		].join(' '),
-		prompt: 'consent',
-	}
-
-	const qs = new URLSearchParams(options)
-
-	return `${rootUrl}?${qs.toString()}`
-}

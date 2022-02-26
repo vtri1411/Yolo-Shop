@@ -1,0 +1,23 @@
+.show-verification {
+	margin: 160px auto 80px;
+	border: 1px solid $main-color;
+	max-width: 600px;
+	position: relative;
+	padding: 30px 20px 20px;
+
+	&__text {
+		font-size: 1.6rem;
+		color: $txt-color-1;
+	}
+
+	&__link {
+		color: $main-color;
+		text-decoration: underline;
+		font-weight: 500;
+		cursor: pointer;
+
+		&.disabled {
+			cursor: not-allowed;
+		}
+	}
+}

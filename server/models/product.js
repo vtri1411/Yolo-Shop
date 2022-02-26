@@ -8,11 +8,7 @@ const productSchema = new Schema({
 		required: true,
 		unique: true,
 	},
-	image01: {
-		type: String,
-		required: true,
-	},
-	image02: { String },
+	images: [String],
 	category: {
 		type: Types.ObjectId,
 		required: true,
@@ -21,6 +17,9 @@ const productSchema = new Schema({
 		type: String,
 		required: true,
 	},
+   unit: {
+      type: String
+   },
 	inventory: [
 		{
 			size: {
