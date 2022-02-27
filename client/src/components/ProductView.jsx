@@ -100,9 +100,7 @@ const ProductView = (props) => {
 			</div>
 			<div className='product__info'>
 				<h2 className='product__info__name'>Áo thun</h2>
-				<div className='product__info__item'>
-					<span className='product__info__price'>189,000</span>
-				</div>
+
 				<div className='product__info__item'>
 					<div className='product__info__item__title'>Màu sắc</div>
 					<div className='product__info__item__list'>
@@ -134,6 +132,9 @@ const ProductView = (props) => {
 							</div>
 						))}
 					</div>
+				</div>
+				<div className='product__info__item'>
+					<span className='product__info__price'>189,000</span>
 				</div>
 				<div className='product__info__item'>
 					<div className='product__info__item__title'>Số lượng</div>

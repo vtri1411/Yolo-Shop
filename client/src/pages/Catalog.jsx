@@ -1,64 +1,117 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { getAllProducts } from '../redux/product/product.actions'
+
 import Helmet from '../components/Helmet'
-
-import productData from '../assets/fake-data/products'
-import category from '../assets/fake-data/category'
-import productColor from '../assets/fake-data/product-color'
-import productSize from '../assets/fake-data/product-size'
-
 import CustomCheckbox from '../components/CustomCheckbox'
 import Button from '../components/Button'
 import InfinityList from '../components/InfinityList'
-import { useEffect } from 'react'
 import Maginer from '../components/Marginer'
+import ProductList from '../components/ProductList'
+import Input from '../components/Input'
+import Dropdown from '../components/Dropdown'
+
+const filterType = {
+	CATEGORY: 'CATEGORY',
+	COLOR: 'COLOR',
+	SIZE: 'SIZE',
+	BRAND: 'BRAND',
+}
+
+const mapState = ({ product, category, brand, size, color }) => ({
+	products: product.products,
+	categories: category.categories,
+	colors: color.colors,
+	brands: brand.brands,
+	sizes: size.sizes,
+})
+
+const selectOption = [
+	{ value: 'newest', display: 'Mới nhất' },
+	{ value: 'oldest', display: 'Cũ nhất' },
+	{ value: 'priceAsc', display: 'Giá thấp tới cao' },
+	{ value: 'priceDesc', display: 'Giá cao tới thấp' },
+]
 
 const Catalog = () => {
+	const dispatch = useDispatch()
+
 	const filterRef = useRef(null)
 
-	const [activeFilter, setActiveFilter] = useState(false)
+	const { products, brands, categories, colors, sizes } = useSelector(mapState)
 
-	const [products, setProducts] = useState(productData.getAllProducts())
+	const [activeFilter, setActiveFilter] = useState(false)
 
 	const initialFilter = {
 		category: [],
 		color: [],
 		size: [],
+		brand: [],
 	}
 	const [filter, setFilter] = useState(initialFilter)
+
+	const [searchInput, setSearchInput] = useState('')
+
+	const [sort, setSort] = useState('')
+
+	const handleSetCheckFilter = (id, type) => {
+		switch (type) {
+			case filterType.BRAND:
+				return filter.brand.some((item) => item === id)
+			case filterType.CATEGORY:
+				return filter.category.some((item) => item === id)
+			case filterType.COLOR:
+				return filter.color.some((item) => item === id)
+			case filterType.SIZE:
+				return filter.size.some((item) => item === id)
+			default:
+				throw new Error('Filter type not exist')
+		}
+	}
 
 	const handleChangeFilter = (type, checked, value) => {
 		if (checked) {
 			switch (type) {
-				case 'CATEGORY':
+				case filterType.CATEGORY:
 					setFilter({ ...filter, category: [...filter.category, value] })
 					break
-				case 'COLOR':
+				case filterType.COLOR:
 					setFilter({ ...filter, color: [...filter.color, value] })
 					break
-				case 'SIZE':
+				case filterType.SIZE:
 					setFilter({ ...filter, size: [...filter.size, value] })
+					break
+				case filterType.BRAND:
+					setFilter({ ...filter, brand: [...filter.brand, value] })
 					break
 				default:
 					throw new Error()
 			}
 		} else {
 			switch (type) {
-				case 'CATEGORY':
+				case filterType.CATEGORY:
 					setFilter({
 						...filter,
 						category: filter.category.filter((item) => item !== value),
 					})
 					break
-				case 'COLOR':
+				case filterType.COLOR:
 					setFilter({
 						...filter,
 						color: filter.color.filter((item) => item !== value),
 					})
 					break
-				case 'SIZE':
+				case filterType.SIZE:
 					setFilter({
 						...filter,
 						size: filter.size.filter((item) => item !== value),
+					})
+					break
+				case filterType.BRAND:
+					setFilter({
+						...filter,
+						brand: filter.brand.filter((item) => item !== value),
 					})
 					break
 				default:
@@ -71,25 +124,11 @@ const Catalog = () => {
 		setFilter(initialFilter)
 	}
 
-	useEffect(() => {
-		let productsTemp = productData.getAllProducts()
-		if (filter.category.length > 0) {
-			productsTemp = productsTemp.filter((item) =>
-				filter.category.some((cate) => cate === item.categorySlug)
-			)
-		}
-		if (filter.color.length > 0) {
-			productsTemp = productsTemp.filter((item) =>
-				filter.color.some((color) => item.colors.some((e) => e === color))
-			)
-		}
-		if (filter.size.length > 0) {
-			productsTemp = productsTemp.filter((item) =>
-				filter.size.some((size) => item.size.some((e) => e === size))
-			)
-		}
-		setProducts(productsTemp)
-	}, [filter])
+	const handleFilter = (e) => {
+		e.preventDefault()
+
+		dispatch(getAllProducts({ filter, searchInput, sort }))
+	}
 
 	useEffect(() => {
 		if (activeFilter) {
@@ -111,68 +150,66 @@ const Catalog = () => {
 							<i className='bx bx-left-arrow-alt'></i>
 						</div>
 					</div>
+
 					<div className='catalog__filter__widget'>
 						<div className='catalog__filter__widget__title'>
-							<h3>Danh mục sản phẩm</h3>
+							<h3>Từ khoá</h3>
 						</div>
-						{category.map((item, index) => (
-							<div key={index} className='catalog__filter__widget__item'>
-								<CustomCheckbox
-									label={item.display}
-									checked={filter.category.some(
-										(e) => e === item.categorySlug
-									)}
-									onChange={(input) =>
-										handleChangeFilter(
-											'CATEGORY',
-											input.checked,
-											item.categorySlug
-										)
-									}
-								/>
-							</div>
-						))}
+						<div className='catalog__filter__input'>
+							<Input
+								type={'text'}
+								value={searchInput}
+								onChange={(e) => setSearchInput(e.target.value)}
+								placeholder={'Nhập từ khoá'}
+							/>
+						</div>
 					</div>
+
 					<div className='catalog__filter__widget'>
 						<div className='catalog__filter__widget__title'>
-							<h3>Màu sắc</h3>
+							<h3>Sắp xếp</h3>
 						</div>
-						{productColor.map((item, index) => (
-							<div key={index} className='catalog__filter__widget__item'>
-								<CustomCheckbox
-									label={item.display}
-									checked={filter.color.some((e) => e === item.color)}
-									onChange={(input) =>
-										handleChangeFilter(
-											'COLOR',
-											input.checked,
-											item.color
-										)
-									}
-								/>
-							</div>
-						))}
+
+						<Dropdown
+							defaultDisplay='Sắp xếp theo'
+							options={selectOption}
+							onChange={setSort}
+						/>
 					</div>
+
+					<FilterWidget
+						list={brands}
+						title='Thương hiệu'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.BRAND}
+						handleChangeFilter={handleChangeFilter}
+					/>
+					<FilterWidget
+						list={categories}
+						title='Danh mục'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.CATEGORY}
+						handleChangeFilter={handleChangeFilter}
+					/>
+					<FilterWidget
+						list={colors}
+						title='Màu sắc'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.COLOR}
+						handleChangeFilter={handleChangeFilter}
+					/>
+					<FilterWidget
+						list={sizes}
+						title='Size'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.SIZE}
+						handleChangeFilter={handleChangeFilter}
+					/>
+
 					<div className='catalog__filter__widget'>
-						<div className='catalog__filter__widget__title'>
-							<h3>Size</h3>
-						</div>
-						{productSize.map((item, index) => (
-							<div key={index} className='catalog__filter__widget__item'>
-								<CustomCheckbox
-									label={item.display}
-									checked={filter.size.some((e) => e === item.size)}
-									onChange={(input) =>
-										handleChangeFilter(
-											'SIZE',
-											input.checked,
-											item.size
-										)
-									}
-								/>
-							</div>
-						))}
+						<Button onClick={handleFilter}>Xác nhận</Button>
 					</div>
+
 					<div className='catalog__filter__widget'>
 						<Button onClick={handleResetFilter}>Xóa bộ lọc</Button>
 					</div>
@@ -181,12 +218,63 @@ const Catalog = () => {
 					<Button onClick={() => setActiveFilter(true)}>Bộ lọc</Button>
 				</div>
 				<div className='catalog__product'>
-					<InfinityList data={products} />
+					<InfinityList products={products} />
+					{/* <ProductList /> */}
 				</div>
 			</div>
 			<Maginer />
 		</Helmet>
 	)
+}
+
+const FilterWidget = ({
+	list,
+	title,
+	handleChangeFilter,
+	handleSetCheckFilter,
+	type,
+}) => {
+	return (
+		<div className='catalog__filter__widget'>
+			<div className='catalog__filter__widget__title'>
+				<h3>{title}</h3>
+			</div>
+			{list?.map((item) => (
+				<div key={item._id} className='catalog__filter__widget__item'>
+					<CustomCheckbox
+						label={item.name}
+						checked={handleSetCheckFilter(item._id, type)}
+						onChange={(e) =>
+							handleChangeFilter(type, e.target.checked, item._id)
+						}
+					/>
+				</div>
+			))}
+		</div>
+	)
+}
+
+{
+	/* <div className='catalog__filter__widget'>
+	<div className='catalog__filter__widget__title'>
+		<h3>Danh mục sản phẩm</h3>
+	</div>
+	{categories?.map((item) => (
+		<div key={item._id} className='catalog__filter__widget__item'>
+			<CustomCheckbox
+				label={item.name}
+				checked={filter.category.some((e) => e === item._id)}
+				onChange={(e) =>
+					handleChangeFilter(
+						filterType.CATEGORY,
+						e.target.checked,
+						item._id
+					)
+				}
+			/>
+		</div>
+	))}
+</div> */
 }
 
 export default Catalog

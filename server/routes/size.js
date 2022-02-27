@@ -25,4 +25,32 @@ router.get('/', async (req, res) => {
 	}
 })
 
+// @route   POST api/size
+// @desc    Create a new size
+// @access
+router.post('/', async (req, res) => {
+	try {
+		const { sizeName } = req.body
+
+		if (!sizeName) {
+			return res.json({
+				status: 'FAIL',
+				message: 'Tên loại không hợp lệ!',
+			})
+		}
+
+		const size = new Size({ name: sizeName })
+		await size.save()
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Create a new size success!',
+			payload: size,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
 module.exports = router

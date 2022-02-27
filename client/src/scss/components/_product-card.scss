@@ -2,11 +2,13 @@
 	padding: 0 2rem;
 
 	&__img {
-		padding-top: 150%;
+		padding-top: 100%;
 		position: relative;
 		overflow: hidden;
+		border: 1px solid #ddd;
 
 		img {
+			display: block;
 			height: 100%;
 			object-fit: contain;
 			position: absolute;
@@ -20,11 +22,11 @@
 			position: absolute;
 			top: 0;
 			left: 50%;
-			transform: translate(-50%, -100%);
+			transform: translate(-50%, -101%);
 		}
 
 		&:hover img:nth-child(1) {
-			transform: translate(-50%, 100%);
+			transform: translate(-50%, 101%);
 		}
 
 		&:hover img:nth-child(2) {
@@ -34,18 +36,19 @@
 	&__info {
 		color: $txt-color-2;
 		margin-top: 1rem;
+		text-align: center;
+		font-size: 1.8rem;
 
 		&__name {
-			font-size: 1.8rem;
 		}
 
 		&__price {
-			@include flex(center);
+			// @include flex(center);
 			margin-top: 0.4rem;
 
 			span {
 				color: $txt-orange;
-				font-weight: 600;
+				font-weight: 700;
 				font-size: 1.8rem;
 			}
 
@@ -53,11 +56,13 @@
 				color: $txt-color-2;
 				font-weight: 400;
 				margin-left: 2rem;
+				font-size: 1.6rem;
 			}
 		}
 	}
 	&__btn {
 		margin-top: 1rem;
 		width: 100%;
+		@include flex(center, center);
 	}
 }

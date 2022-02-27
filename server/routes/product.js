@@ -41,23 +41,28 @@ router.get('/:id', async (req, res) => {
 // @access
 router.post('/', async (req, res) => {
 	try {
-		const { name, image01, image02, category, description, inventory } =
-			req.body
-
-		console.log({
+		const {
 			name,
-			image01,
-			image02,
+			images,
 			category,
+			brand,
+			available,
+			unit,
+			price,
 			description,
 			inventory,
-		})
+		} = req.body
+
+		console.log({ ...req.body })
 
 		const product = new Product({
 			name,
+			images,
 			category,
-			image01,
-			image02,
+			brand,
+			available,
+			unit,
+			price,
 			description,
 			inventory,
 		})

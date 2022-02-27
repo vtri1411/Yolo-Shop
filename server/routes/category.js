@@ -25,4 +25,32 @@ router.get('/', async (req, res) => {
 	}
 })
 
+// @route   POST api/category
+// @desc    Create a new category
+// @access
+router.post('/', async (req, res) => {
+	try {
+		const { categoryName } = req.body
+
+		if (!categoryName) {
+			return res.json({
+				status: 'FAIL',
+				message: 'Tên loại không hợp lệ!',
+			})
+		}
+
+		const category = new Category({ name: categoryName })
+		await category.save()
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Create a new category success!',
+			payload: category,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
 module.exports = router

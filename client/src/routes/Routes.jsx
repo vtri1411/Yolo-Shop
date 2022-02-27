@@ -17,6 +17,8 @@ const Routes = () => {
 	return (
 		<Switch>
 			<Route path='/' exact component={Home} />
+
+			{/* Auth */}
 			<Route path='/login' exact component={Login} />
 			<Route
 				path='/verification-user'
@@ -31,9 +33,15 @@ const Routes = () => {
 				exact
 				component={ResetPassword}
 			/>
+
+			{/* Product */}
 			<Route path='/catalog' exact component={Catalog} />
-			<Route path='/catalog/:slug' exact component={Product} />
+			<Route path='/product/:id' exact component={Product} />
+
+			{/* Cart */}
 			<Route path='/cart' exact component={Cart} />
+
+			{/* 404 */}
 			<Route component={NotFound} />
 		</Switch>
 	)

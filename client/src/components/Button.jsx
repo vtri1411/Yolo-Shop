@@ -10,6 +10,7 @@ const Button = (props) => {
 		<button
 			className={`btn ${size} ${animate} ${props.className}`}
 			onClick={props.onClick ? props.onClick : null}
+			style={props.style}
 		>
 			{props.icon && (
 				<span className='btn__icon'>
@@ -25,7 +26,7 @@ Button.propTypes = {
 	size: PropTypes.string,
 	animate: PropTypes.bool,
 	icon: PropTypes.string,
-	onClick: PropTypes.func
+	onClick: PropTypes.func,
 }
 
 export default Button

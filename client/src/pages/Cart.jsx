@@ -11,7 +11,7 @@ const Cart = () => {
 					<div className='cart__info__count'>
 						Bạn có {3} sản phẩm trong giỏ hàng
 					</div>
-					<div className='cart__info__price'>
+					<div className='cart__info__txt__price'>
 						<span>Thành tiền</span>
 						<span className=''>577,000</span>
 					</div>

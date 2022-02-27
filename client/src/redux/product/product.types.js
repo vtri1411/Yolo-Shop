@@ -1,3 +1,5 @@
-const userTypes = {}
+const productTypes = {
+	GET_ALL_PRODUCT_SUCCESS: 'GET_ALL_PRODUCT_SUCCESS',
+}
 
-export default userTypes
+export default productTypes

@@ -8,33 +8,50 @@ const productSchema = new Schema({
 		required: true,
 		unique: true,
 	},
-	images: [String],
+	images: [
+		{
+			type: String,
+			required: true,
+		},
+	],
 	category: {
 		type: Types.ObjectId,
 		required: true,
+		ref: 'category',
+	},
+	brand: {
+		type: Types.ObjectId,
+		required: true,
+		ref: 'brand',
 	},
 	description: {
 		type: String,
 		required: true,
 	},
-   unit: {
-      type: String
-   },
+	available: {
+		type: Boolean,
+		required: true,
+	},
+	unit: {
+		type: String,
+	},
+	price: {
+		type: Number,
+		required: true,
+	},
 	inventory: [
 		{
 			size: {
-				type: String,
+				type: Types.ObjectId,
 				required: true,
+				ref: 'size',
 			},
 			color: {
-				type: String,
+				type: Types.ObjectId,
 				required: true,
+				ref: 'color',
 			},
 			amount: {
-				type: Number,
-				required: true,
-			},
-			price: {
 				type: Number,
 				required: true,
 			},

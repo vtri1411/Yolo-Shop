@@ -15,13 +15,14 @@
 @import './components/footer';
 @import './components/product-card';
 @import './components/section';
-@import './components/catalog';
 @import './components/custom-checkbox';
 @import './components/product';
 @import './components/quantity';
 @import './components/product-modal';
 @import './components/input';
+@import './components/dropdown';
 
 // Pages
 @import './pages/auth';
+@import './pages/catalog';
 @import './pages/show-verification';

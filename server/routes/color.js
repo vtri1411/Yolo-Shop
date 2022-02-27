@@ -25,4 +25,32 @@ router.get('/', async (req, res) => {
 	}
 })
 
+// @route   POST api/color
+// @desc    Create a new color
+// @access
+router.post('/', async (req, res) => {
+	try {
+		const { colorName, hex } = req.body
+
+		if (!colorName || !hex) {
+			return res.json({
+				status: 'FAIL',
+				message: 'Tên màu hoặc mã màu không hợp lệ!',
+			})
+		}
+
+		const color = new Color({ name: colorName, hex })
+		await color.save()
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Create a new color success!',
+			payload: color,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
 module.exports = router
