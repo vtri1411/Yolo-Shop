@@ -39,6 +39,10 @@ const productSchema = new Schema({
 		type: Number,
 		required: true,
 	},
+	createAt: {
+		type: Date,
+		default: Date.now,
+	},
 	inventory: [
 		{
 			size: {

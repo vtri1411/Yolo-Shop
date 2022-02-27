@@ -28,10 +28,10 @@ const mapState = ({ product, category, brand, size, color }) => ({
 })
 
 const selectOption = [
-	{ value: 'newest', display: 'Mới nhất' },
-	{ value: 'oldest', display: 'Cũ nhất' },
-	{ value: 'priceAsc', display: 'Giá thấp tới cao' },
-	{ value: 'priceDesc', display: 'Giá cao tới thấp' },
+	{ value: 'NEWEST', display: 'Mới nhất' },
+	{ value: 'OLDEST', display: 'Cũ nhất' },
+	{ value: 'PRICE_ASC', display: 'Giá thấp tới cao' },
+	{ value: 'PRICE_DESC', display: 'Giá cao tới thấp' },
 ]
 
 const Catalog = () => {

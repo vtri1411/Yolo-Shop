@@ -26,9 +26,4 @@ const ProductList = ({ title, products }) => {
 	)
 }
 
-ProductList.propTypes = {
-	items: PropTypes.array.isRequired,
-	title: PropTypes.string,
-}
-
 export default ProductList

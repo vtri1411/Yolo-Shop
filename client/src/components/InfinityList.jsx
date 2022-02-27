@@ -61,7 +61,7 @@ const InfinityList = ({ products }) => {
 					products.map((item) => (
 						<ProductCard
 							key={item._id}
-							id={item._id}
+							_id={item._id}
 							name={item.name}
 							images={item.images}
 							price={item.price}

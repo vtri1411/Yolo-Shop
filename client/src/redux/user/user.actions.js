@@ -1,14 +1,7 @@
 import userTypes from './user.types'
 import axios from '../../config/axios'
 import { toast } from 'react-toastify'
-
-const toastUpdate = {
-	isLoading: false,
-	hideProgressBar: false,
-	autoClose: 5000,
-	position: 'top-center',
-	closeOnClick: true,
-}
+import toastUpdate from '../../config/toastUpdate'
 
 export const loadUser = () => async (dispatch) => {
 	try {

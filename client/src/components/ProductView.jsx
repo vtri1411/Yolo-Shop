@@ -1,12 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
+
+import { toast } from 'react-toastify'
 
 import Button from '../components/Button'
 import Quantity from '../components/Quantity'
+import { getProductById } from '../redux/product/product.actions'
 
-const ProductView = (props) => {
-	const product = props.product
+const mapState = ({ color }) => ({ colors: color.colors })
 
-	const [mainImg, setMainImg] = useState('')
+const ProductView = ({ product }) => {
+	const { colors } = useSelector(mapState)
+
+	const [mainImg, setMainImg] = useState(product.images[0])
 
 	const [color, setColor] = useState('')
 
@@ -16,13 +23,28 @@ const ProductView = (props) => {
 
 	const [expandDesc, setExpandDesc] = useState(false)
 
-	useEffect(() => {
-		setMainImg(product.image01)
-		setColor('')
-		setSize('')
-		setQuantity(1)
-		setExpandDesc(false)
-	}, [product])
+	// Bc inventory is array, each item is {size, color, amount}
+	// So this func to get all different color of this product
+	const { productColors, productSizes } = useMemo(() => {
+		const tempColors = []
+		const tempSizes = []
+		if (Array.isArray(product.inventory)) {
+			product.inventory.forEach((item) => {
+				if (!color || item.color._id === color) {
+					if (!tempSizes.includes(item.size._id)) {
+						tempSizes.push(item.size)
+					}
+				}
+
+				if (!size || item.size._id === size) {
+					if (!tempSizes.includes(item.color._id)) {
+						tempColors.push(item.color)
+					}
+				}
+			})
+		}
+		return { productColors: tempColors, productSizes: tempSizes }
+	}, [product, size, color])
 
 	const handleChangeQuantity = (type, value) => {
 		if (type === '+') {
@@ -33,9 +55,18 @@ const ProductView = (props) => {
 	}
 
 	const check = () => {
-		if (color === '') return false
-		if (size === '') return false
-		if (quantity < 1) return false
+		if (color === '') {
+			toast.error('Vui lòng chọn màu sắc!')
+			return false
+		}
+		if (size === '') {
+			toast.error('Vui lòng chọn size!')
+			return false
+		}
+		if (quantity < 1) {
+			toast.error('Vui lòng chọn số lượng hợp lệ!')
+			return false
+		}
 		return true
 	}
 
@@ -62,21 +93,25 @@ const ProductView = (props) => {
 					<div className='product__imgs__list'>
 						<div
 							className='product__imgs__list__item'
-							onClick={() => setMainImg(product.image01)}
+							onClick={() => setMainImg(product.images[0])}
 						>
 							<img
-								src={product.image01}
-								className={mainImg === product.image01 ? 'active' : ''}
+								src={product.images[0]}
+								className={
+									mainImg === product.images[0] ? 'active' : ''
+								}
 								alt=''
 							/>
 						</div>
 						<div
 							className='product__imgs__list__item'
-							onClick={() => setMainImg(product.image02)}
+							onClick={() => setMainImg(product.images[1])}
 						>
 							<img
-								src={product.image02}
-								className={mainImg === product.image02 ? 'active' : ''}
+								src={product.images[1]}
+								className={
+									mainImg === product.images[1] ? 'active' : ''
+								}
 								alt=''
 							/>
 						</div>
@@ -104,23 +139,47 @@ const ProductView = (props) => {
 				<div className='product__info__item'>
 					<div className='product__info__item__title'>Màu sắc</div>
 					<div className='product__info__item__list'>
-						{product.colors.map((item, index) => (
-							<div
-								key={index}
-								className={`product__info__item__list__item ${
-									color === item ? 'active' : ''
-								}`}
-								onClick={() => setColor(item)}
-							>
-								<div className={`circle bg-${item}`}></div>
-							</div>
-						))}
+						{Array.isArray(productColors) &&
+							productColors.map((item) => (
+								<div
+									key={item._id}
+									className={`product__info__item__list__item ${
+										color === item._id ? 'active' : ''
+									}`}
+									onClick={() =>
+										color === item._id
+											? setColor('')
+											: setColor(item._id)
+									}
+								>
+									<div
+										className={`circle`}
+										style={{ backgroundColor: `${item.hex}` }}
+									></div>
+								</div>
+							))}
 					</div>
 				</div>
 				<div className='product__info__item'>
 					<div className='product__info__item__title'>Kích cỡ</div>
 					<div className='product__info__item__list'>
-						{product.size.map((item, index) => (
+						{Array.isArray(productSizes) &&
+							productSizes.map((item) => (
+								<div
+									key={item._id}
+									className={`product__info__item__list__item ${
+										size === item._id ? 'active' : ''
+									}`}
+									onClick={() =>
+										size === item._id
+											? setSize('')
+											: setSize(item._id)
+									}
+								>
+									<span className='size'>{item.name}</span>
+								</div>
+							))}
+						{/* {product.size.map((item, index) => (
 							<div
 								key={index}
 								className={`product__info__item__list__item ${
@@ -130,7 +189,7 @@ const ProductView = (props) => {
 							>
 								<span className='size'>{item}</span>
 							</div>
-						))}
+						))} */}
 					</div>
 				</div>
 				<div className='product__info__item'>

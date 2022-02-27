@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
+import { setProductModal } from '../redux/product/product.actions'
 
 // import { set } from '../redux/product-modal/productModalSlice'
 
@@ -9,12 +10,12 @@ import Button from './Button'
 const ProductCard = ({ name, images, price, _id }) => {
 	const dispatch = useDispatch()
 	const buyProduct = () => {
-		// dispatch(set(_id))
+		dispatch(setProductModal(_id))
 	}
 
 	return (
 		<div className='product-card'>
-			<Link to={`catalog/${_id}`}>
+			<Link to={`/product/${_id}`}>
 				<div className='product-card__img'>
 					<img src={images?.[0]} alt='' className='product-card__img-1' />
 					<img src={images?.[1]} alt='' className='product-card__img-2' />

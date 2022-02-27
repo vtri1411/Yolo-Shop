@@ -1,30 +1,49 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import productData from '../assets/fake-data/products'
-
-// import { remove } from '../redux/product-modal/productModalSlice'
+import { setShowProductModal } from '../redux/product/product.actions'
 
 import ProductView from './ProductView'
 import Button from './Button'
+import ReactLoading from 'react-loading'
+
+const mapState = ({ product }) => ({
+	productModal: product.productModal,
+	isShowProductModal: product.isShowProductModal,
+	isLoadingProductModal: product.isLoadingProductModal,
+})
 
 const ProductViewModal = (props) => {
 	const dispatch = useDispatch()
 
-	const product = productData.getProductBySlug()
+	const { isLoadingProductModal, isShowProductModal, productModal } =
+		useSelector(mapState)
 
 	return (
-		<div className={`product-view__modal ${product ? 'active' : ''}`}>
+		<div
+			className={`product-view__modal ${isShowProductModal ? 'active' : ''}`}
+		>
 			<div className='product-view__modal__content'>
 				<div className='product-view__modal__content__btn'>
 					<Button
 						size='sm'
-						// onClick={() => dispatch(remove())}
+						onClick={() => dispatch(setShowProductModal(false))}
 					>
 						Đóng
 					</Button>
 				</div>
-				{product && <ProductView product={product} />}
+				{isLoadingProductModal ? (
+					<div class='product-view__modal__content__loading'>
+						<ReactLoading
+							type='bars'
+							color='#4267b2'
+							width={'20%'}
+							height={'10%'}
+						/>
+					</div>
+				) : (
+					productModal && <ProductView product={productModal} />
+				)}
 			</div>
 		</div>
 	)

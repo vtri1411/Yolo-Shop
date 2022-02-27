@@ -115,8 +115,9 @@ const Header = (props) => {
 							<i className='bx bx-search'></i>
 						</div>
 						<div className='header__nav__item header__nav__icon header__nav__right__item header__nav__cart '>
-							<Link to='/cart'>
+							<Link className='header__nav__cart__link' to='/cart'>
 								<i className='bx bx-shopping-bag'></i>
+								<div class='header__nav__cart__link__amount'>8</div>
 							</Link>
 							<div
 								className={`header__nav__cart__panel ${
@@ -210,7 +211,10 @@ const Header = (props) => {
 								/>
 							) : user ? (
 								<div className='header__nav__auth__avatar'>
-									<img src={user.avatar ? user.avatar : blankAvt}  alt=''/>
+									<img
+										src={user.avatar ? user.avatar : blankAvt}
+										alt=''
+									/>
 								</div>
 							) : (
 								<i className='bx bx-user'></i>

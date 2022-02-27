@@ -230,6 +230,25 @@
 		&__cart {
 			position: relative;
 
+			&__link {
+				display: block;
+				position: relative;
+
+				&__amount {
+					@include flex(center, center);
+					font-size: 1.6rem;
+					position: absolute;
+					right: 0;
+					bottom: 0;
+					transform: translate(50%, 50%);
+					border: 2px solid $main-color;
+					background-color: $main-bg;
+					border-radius: 50%;
+					width: 20px;
+					height: 20px;
+				}
+			}
+
 			&__panel {
 				position: absolute;
 				right: 0;

@@ -4,3 +4,7 @@
 2. 002: Error password
 3. 003: Email unverified
 4. 004: Expired time
+
+## Note when deploy:
+
+1. Create index text for mongodb (google this keyword: $text)
