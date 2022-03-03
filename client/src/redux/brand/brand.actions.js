@@ -1,4 +1,4 @@
-import axios from '../../config/axios'
+import axios from 'axios'
 import brandTypes from './brand.types'
 
 export const getAllBrand = () => async (dispatch) => {

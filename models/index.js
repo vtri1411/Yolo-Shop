@@ -1,7 +1,5 @@
 const { DataTypes, Sequelize, Op, QueryTypes } = require('sequelize')
 
-console.log({ allEnv: process.env })
-
 const sequelize =
 	process.env.NODE_ENV === 'production'
 		? new Sequelize(
@@ -12,6 +10,7 @@ const sequelize =
 					host: process.env.MYSQLHOST,
 					dialect: 'mysql',
 					logging: false,
+					port: process.env.MYSQLPORT,
 
 					pool: {
 						max: 5,
@@ -27,7 +26,10 @@ const sequelize =
 				process.env.LC_MYSQLPASSWORD,
 				{
 					host: process.env.LC_MYSQLHOST,
+					port: process.env.MYSQLPORT,
 					dialect: 'mysql',
+					// Default sql port
+					port: 3306,
 					logging: false,
 
 					pool: {
@@ -38,8 +40,6 @@ const sequelize =
 					},
 				}
 		  )
-
-console.log({ sequelize })
 
 sequelize
 	.authenticate()
@@ -65,8 +65,11 @@ db.Image = require('./image')(sequelize, DataTypes)
 db.Inventory = require('./inventory')(sequelize, DataTypes)
 db.Cart = require('./cart')(sequelize, DataTypes)
 db.OrderHistory = require('./orderHistory')(sequelize, DataTypes)
+db.OrderDetail = require('./orderDetail')(sequelize, DataTypes)
+db.UserRole = require('./userRole')(sequelize, DataTypes)
+// Single table
 
-// Prodcut associations
+// Prodcut associations start
 db.Category.hasMany(db.Product, { foreignKey: 'categoryId' })
 db.Product.belongsTo(db.Category)
 
@@ -78,14 +81,17 @@ db.Image.belongsTo(db.Product)
 
 db.Product.hasMany(db.Inventory)
 db.Inventory.belongsTo(db.Product)
-// Product associations
+// Product associations end
 
-// Inventory associations
+// Inventory associations start
 db.Size.hasMany(db.Inventory)
 db.Inventory.belongsTo(db.Size)
 
 db.Color.hasMany(db.Inventory)
 db.Inventory.belongsTo(db.Color)
+
+db.Inventory.hasMany(db.OrderDetail)
+db.OrderDetail.belongsTo(db.Inventory)
 
 //    Super Many-To-Many
 db.Inventory.belongsToMany(db.User, { through: db.Cart })
@@ -95,14 +101,7 @@ db.Cart.belongsTo(db.Inventory)
 db.User.hasMany(db.Cart)
 db.Cart.belongsTo(db.User)
 //    Super Many-To-Many
-
-db.Inventory.belongsToMany(db.User, { through: db.OrderHistory })
-db.User.belongsToMany(db.Inventory, { through: db.OrderHistory })
-db.Inventory.hasMany(db.OrderHistory)
-db.OrderHistory.belongsTo(db.Inventory)
-db.User.hasMany(db.OrderHistory)
-db.OrderHistory.belongsTo(db.User)
-// Inventory associations
+// Inventory associations end
 
 // User associations
 db.User.hasOne(db.UserVerification)
@@ -110,17 +109,28 @@ db.UserVerification.belongsTo(db.User)
 
 db.User.hasOne(db.UserRecovery)
 db.UserRecovery.belongsTo(db.User)
+
+db.User.hasMany(db.OrderHistory)
+db.OrderHistory.belongsTo(db.User)
+
+db.User.hasMany(db.UserRole)
+db.UserRole.belongsTo(db.User)
 // User associations
+
+// Order History associations
+db.OrderHistory.hasMany(db.OrderDetail)
+db.OrderDetail.belongsTo(db.OrderHistory)
+// Order History associations
 
 const force = false
 
 db.sequelize
 	.sync({ force })
-	.then(() =>
-		sequelize.query(
-			'CREATE FULLTEXT INDEX name_description_f_txt ON products(name,description)'
-		)
-	)
+	// .then(() =>
+	// 	sequelize.query(
+	// 		'CREATE FULLTEXT INDEX name_description_f_txt ON products(name,description)'
+	// 	)
+	// )
 	.then(() => console.log(`Mysql are syncing with { force: ${force} } . . .`))
 	.catch((err) => console.log(err))
 

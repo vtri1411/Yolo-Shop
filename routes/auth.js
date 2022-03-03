@@ -6,11 +6,12 @@ const constant = require('../config/constants')
 
 const auth = require('../middlewares/auth')
 
-const { User } = require('../models/index')
+const { User, Role, UserRole } = require('../models/index')
 
 const setAuthCooki = require('../utilities/setAuthCooki')
 const { checkIsEmail } = require('../utilities/validator')
 
+// Update true
 // @route   POST api/auth/login
 // @desc    Login a user
 // @access  Public
@@ -26,7 +27,16 @@ router.post('/login', async (req, res) => {
 			})
 		}
 
-		const user = await User.findOne({ where: { email } })
+		const user = await User.findOne({
+			where: { email },
+			include: [
+				{
+					model: UserRole,
+					required: true,
+					attributes: ['role'],
+				},
+			],
+		})
 
 		if (!user) {
 			return res.json({
@@ -52,7 +62,11 @@ router.post('/login', async (req, res) => {
 			})
 		}
 
-		setAuthCooki(res, user.id)
+		setAuthCooki({
+			res,
+			userId: user.id,
+			userRoles: user.userRoles.map((item) => item.role),
+		})
 
 		res.json({
 			status: 'SUCCESS',

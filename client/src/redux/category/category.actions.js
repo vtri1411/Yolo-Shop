@@ -1,5 +1,5 @@
 import categoryTypes from './category.types'
-import axios from '../../config/axios'
+import axios from 'axios'
 
 export const getAllCategory = () => async (dispatch) => {
 	try {

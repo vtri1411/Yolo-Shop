@@ -5,7 +5,7 @@ module.exports = function (sequelize, DataTypes, Brand, Category) {
 			allowNull: false,
 		},
 		description: {
-			type: DataTypes.STRING,
+			type: DataTypes.TEXT,
 			allowNull: false,
 		},
 		available: {
@@ -15,6 +15,10 @@ module.exports = function (sequelize, DataTypes, Brand, Category) {
 		unit: {
 			type: DataTypes.TEXT,
 			allowNull: false,
+		},
+		gender: {
+			type: DataTypes.BOOLEAN,
+			required: true,
 		},
 		price: {
 			type: DataTypes.INTEGER,

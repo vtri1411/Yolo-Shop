@@ -1,5 +1,5 @@
 import colorTypes from './color.types'
-import axios from '../../config/axios'
+import axios from 'axios'
 
 export const getAllColor = () => async (dispatch) => {
 	try {

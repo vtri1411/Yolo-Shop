@@ -3,14 +3,10 @@ const router = require('express').Router()
 const {
 	sequelize,
 	QueryTypes,
-	User,
 	Cart,
 	OrderHistory,
 	Inventory,
-	Size,
-	Color,
-	Product,
-	Image,
+	OrderDetail,
 } = require('../models/index')
 
 const auth = require('../middlewares/auth')
@@ -23,33 +19,11 @@ const { getUserCartQuery } = require('../utilities/query')
 router.get('/', auth, async (req, res) => {
 	try {
 		const orderHistory = await OrderHistory.findAll({
-			where: { userId: req.user },
-			attributes: { exclude: ['inventoryId', 'userId'] },
+			where: { userId: req.userId },
 			include: [
 				{
-					model: Inventory,
-					required: true,
-					attributes: {
-						exclude: ['amount', 'productId', 'sizeId', 'colorId'],
-					},
-					include: [
-						{
-							model: Size,
-							required: true,
-						},
-						{
-							model: Color,
-							required: true,
-						},
-						{
-							model: Product,
-							required: true,
-							attributes: ['name', 'price'],
-							include: [
-								{ model: Image, required: true, attributes: ['url'] },
-							],
-						},
-					],
+					model: OrderDetail,
+					require: true,
 				},
 			],
 		})
@@ -64,29 +38,46 @@ router.get('/', auth, async (req, res) => {
 // @desc    Order products in cart
 // @access  Private
 router.post('/', auth, async (req, res) => {
+	const transaction = await sequelize.transaction()
 	try {
 		const promises = []
 
 		// Check cart valid
-		const cart = await sequelize.query(getUserCartQuery(req.user), {
+		const cart = await sequelize.query(getUserCartQuery(req.userId), {
 			type: QueryTypes.SELECT,
+			lock: true,
+			transaction,
 		})
 
 		// If there is no product in cart return error
 		if (cart.length === 0) {
+			await transaction.rollback()
 			return res.json({ status: 'FAIL', message: 'Giỏ hàng trống!' })
 		}
 
+		// Check if item in cart has quantity > amount in stock
+		// If condition is correct, get total price
+		let totalPrice = 0
 		for (const item of cart) {
-			console.log({ item: JSON.parse(JSON.stringify(item)) })
 			if (!item.isValid) {
+				await transaction.rollback()
 				return res.json({
 					status: 'FAIL',
 					message: 'Giỏ hàng có sản phẩm không hợp lệ!',
 					payload: cart,
 				})
 			}
+			totalPrice += item.quantity * item.price
 		}
+
+		// Add order history
+		const orderHistory = await OrderHistory.create(
+			{
+				userId: req.userId,
+				totalPrice,
+			},
+			{ transaction, lock: true }
+		)
 
 		for (const item of cart) {
 			// Reduce amount of inventory
@@ -94,32 +85,43 @@ router.post('/', auth, async (req, res) => {
 				Inventory.decrement('amount', {
 					by: item.quantity,
 					where: { id: item.inventoryId },
+					transaction,
+					lock: true,
 				})
 			)
 
-			// Add order history
+			// Create order detail
 			promises.push(
-				OrderHistory.create({
-					userId: req.user,
-					inventoryId: item.inventoryId,
-					quantity: item.quantity,
-				})
+				OrderDetail.create(
+					{
+						orderHistoryId: orderHistory.id,
+						inventoryId: item.inventoryId,
+						quantity: item.quantity,
+					},
+					{ lock: true, transaction }
+				)
 			)
 
 			// Delete user's cart
 			promises.push(
-				Cart.destroy({
-					where: { userId: req.user, inventoryId: item.inventoryId },
-				})
+				Cart.destroy(
+					{
+						where: { userId: req.userId, inventoryId: item.inventoryId },
+						transaction,
+					},
+					{ lock: true }
+				)
 			)
 		}
 
 		await Promise.all(promises)
+		await transaction.commit()
 
 		res.json({
 			status: 'SUCCESS',
 		})
 	} catch (error) {
+		await transaction.rollback()
 		console.log(error)
 		res.sendStatus(500)
 	}

@@ -1,5 +1,5 @@
 import sizeTypes from './size.types'
-import axios from '../../config/axios'
+import axios from 'axios'
 
 export const getAllSize = () => async (dispatch) => {
 	try {

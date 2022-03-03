@@ -1,16 +1,16 @@
 module.exports = function (sequelize, DataTypes) {
-	const OrderHistory = sequelize.define('orderHistory', {
+	const OrderDetail = sequelize.define('orderDetail', {
 		id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true,
 			allowNull: false,
 		},
-		// If not neccesary, the remove totalprice
-		totalPrice: {
+		quantity: {
 			type: DataTypes.INTEGER,
+         allowNull: false,
 		},
 	})
 
-	return OrderHistory
+	return OrderDetail
 }

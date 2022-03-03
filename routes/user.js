@@ -14,6 +14,8 @@ const {
 	Product,
 	Size,
 	Color,
+	UserRole,
+	sequelize,
 } = require('../models/index')
 
 const {
@@ -23,19 +25,20 @@ const {
 const createAndHashSecretString = require('../utilities/createAndHashSecretString')
 const setAuthCooki = require('../utilities/setAuthCooki')
 
+// @Update file done
+
 // @route   GET api/user
 // @desc    Get user's account detail
 // @access  Private
 router.get('/', auth, async (req, res) => {
 	try {
-		const user = await User.findByPk(req.user, {
+		const user = await User.findByPk(req.userId, {
 			attributes: { exclude: ['password'] },
 		})
 
 		// If there is no user match with cookie, delete cookie
 		if (!user) {
 			res.cookie('jwt', '', { maxAge: 0, httpOnly: true })
-
 			return res.json({
 				status: 'FAIL',
 				message: 'Cookie không hợp lệ!',
@@ -57,6 +60,8 @@ router.get('/', auth, async (req, res) => {
 // @desc    Create a new user
 // @access  Public
 router.post('/', async (req, res) => {
+	const transaction = await sequelize.transaction()
+
 	try {
 		const { email, password } = req.body
 		let user = await User.findOne({ where: { email: email } })
@@ -70,13 +75,14 @@ router.post('/', async (req, res) => {
 			})
 		}
 
-		// Create hashPassword and user
+		// Create hashPassword
 		const hashPassword = await bcryptjs.hash(
 			password,
 			constants.TIMES_GEN_SALT
 		)
 
-		// Create and save user to database
+		// Create user, create user verification,
+		// create user's roles, send verufication email
 		user = await User.create(
 			{
 				email,
@@ -87,32 +93,46 @@ router.post('/', async (req, res) => {
 				attributes: {
 					exclude: ['password'],
 				},
+				transaction,
 			}
 		)
 
-		// Create secretString and hash it
+		// Create secretString and secretString hashed
 		const { secretString, hashString } = createAndHashSecretString(user.id)
+
 		console.log({ secretString, hashString })
 
-		// Save verification user to database adn Send email to user
+		// Save verification user to database and Send email to user
 		await Promise.all([
-			UserVerification.create({
-				userId: user.id,
-				expiredAt:
-					Date.now() +
-					Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
-				secret: hashString,
-			}),
-			sendVerificationMail(user.id, email, secretString),
+			UserVerification.create(
+				{
+					userId: user.id,
+					expiredAt:
+						Date.now() +
+						Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
+					secret: hashString,
+				},
+				{ transaction }
+			),
+			UserRole.create(
+				{
+					userId: user.id,
+					role: 'CLIENT',
+				},
+				{ transaction }
+			),
 		])
 
-		// Response the status
+		await sendVerificationMail(user.id, email, secretString)
+		await transaction.commit()
+
 		res.json({
 			status: 'SUCCESS',
 			message: 'Đăng ký tài khoản thành công!',
 			payload: user,
 		})
 	} catch (error) {
+		await transaction.rollback()
 		console.log(error)
 		res.json({ status: 'FAIL', code: 500 })
 	}
@@ -125,7 +145,7 @@ router.post('/verification/resend', async (req, res) => {
 	try {
 		const { email } = req.body
 
-		const user = await User.findOne({ where: { email }, raw: true })
+		const user = await User.findOne({ where: { email } })
 
 		// If user is not exist
 		if (!user) {
@@ -144,7 +164,6 @@ router.post('/verification/resend', async (req, res) => {
 
 		// Save secret string hashed to database, send email to user
 		await Promise.all([
-			sendVerificationMail(user.id, email, secretString),
 			UserVerification.create({
 				userId: user.id,
 				expiredAt:
@@ -153,6 +172,8 @@ router.post('/verification/resend', async (req, res) => {
 				secret: hashString,
 			}),
 		])
+
+		sendVerificationMail(user.id, email, secretString)
 
 		res.json({
 			status: 'SUCCESS',
@@ -170,7 +191,15 @@ router.post('/verification/resend', async (req, res) => {
 router.get('/verification/:id/:secret', async (req, res) => {
 	try {
 		const { id, secret } = req.params
-		const user = await User.findByPk(id)
+		const user = await User.findByPk(id, {
+			include: [
+				{
+					model: UserRole,
+					required: true,
+					attributes: ['role'],
+				},
+			],
+		})
 
 		// If user not exists, or has been verified
 		//    response code 400
@@ -188,7 +217,6 @@ router.get('/verification/:id/:secret', async (req, res) => {
 
 		// Check if verification is expired
 		if (Date.now() > userVerification.expiredAt) {
-			// @TODO Do something when user verification expired
 			return res.json({ status: 'FAIL', message: 'Xác nhận đã hết hạn!' })
 		}
 
@@ -201,7 +229,11 @@ router.get('/verification/:id/:secret', async (req, res) => {
 				UserVerification.destroy({ where: { userId: id } }),
 			])
 
-			setAuthCooki(res, id)
+			setAuthCooki({
+				res,
+				userId: id,
+				userRoles: user.userRoles.map((item) => item.role),
+			})
 
 			return res.redirect(constants.ROOT_UI_URL)
 		} else {
@@ -226,14 +258,15 @@ router.post('/recovery/request', async (req, res) => {
 		const { email, redirectUrl } = req.body
 		const user = await User.findOne({ where: { email: email } })
 
+		// Check user exist
 		if (!user || !user.verified) {
 			return res.json({
 				status: 'FAIL',
-				message: 'Email không tồn tại hoặc đã được xác minh!',
+				message: 'Email không tồn tại hoặc chưa được xác minh!',
 			})
 		}
 
-		// Delete all request reset password of this user
+		// If exist, delete all request reset password of this user
 		await UserRecovery.destroy({ where: { userId: user.id } })
 
 		// Create and hash secret string
@@ -250,7 +283,10 @@ router.post('/recovery/request', async (req, res) => {
 			}),
 		])
 
-		res.json({ status: 'SUCCESS', message: 'User recovery password success' })
+		res.json({
+			status: 'SUCCESS',
+			message: 'Request reset password success!',
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
@@ -282,7 +318,7 @@ router.post('/recovery/reset', async (req, res) => {
 				status: 'FAIL',
 				message:
 					'Link khôi phục mật khẩu của bạn đã hết hạn, vui lòng tạo lại !',
-				code: '004',
+				code: 604,
 			})
 		}
 
@@ -292,6 +328,7 @@ router.post('/recovery/reset', async (req, res) => {
 				status: 'FAIL',
 				message:
 					'Liên kết không hợp lệ, vui lòng vào liên kết của mail mới nhất!',
+				code: 605,
 			})
 		}
 
@@ -302,19 +339,34 @@ router.post('/recovery/reset', async (req, res) => {
 
 		// Update password and delete all recovery records
 		const [rowEffected] = await Promise.all([
-			User.update({ password: hashPassword }, { where: { id: userId } }),
+			User.update(
+				{ password: hashPassword },
+				{
+					where: { id: userId },
+				}
+			),
 			UserRecovery.destroy({ where: { userId } }),
 		])
 
 		if (rowEffected === 0) {
 			return res.json({
 				status: 'FAIL',
-				message: 'Id tài khoản không hợp lệ!',
+				message: 'Server error!',
+				code: 500,
 			})
 		}
 
+		// Find user after update
+		const user = await User.findByPk(userId, {
+			include: [{ model: UserRole, require: true }],
+		})
+
 		// Create and set jwt cooki
-		setAuthCooki(res, userId)
+		setAuthCooki({
+			res,
+			userId,
+			userRoles: user.userRoles.map((item) => item.role),
+		})
 
 		res.json({
 			status: 'SUCCESS',

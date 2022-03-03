@@ -1,5 +1,5 @@
 import userTypes from './user.types'
-import axios from '../../config/axios'
+import axios from 'axios'
 import { toast } from 'react-toastify'
 import toastUpdate from '../../config/toastUpdate'
 

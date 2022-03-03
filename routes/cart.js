@@ -10,7 +10,6 @@ const {
 	Op,
 	sequelize,
 	QueryTypes,
-	OrderHistory,
 } = require('../models/index')
 
 const auth = require('../middlewares/auth')
@@ -22,7 +21,7 @@ const { getUserCartQuery } = require('../utilities/query')
 // @access  Private
 router.get('/', auth, async (req, res) => {
 	try {
-		const cart = await sequelize.query(getUserCartQuery(req.user), {
+		const cart = await sequelize.query(getUserCartQuery(req.userId), {
 			type: QueryTypes.SELECT,
 		})
 
@@ -40,7 +39,7 @@ router.post('/addProduct', auth, async (req, res) => {
 	try {
 		const { inventoryId, quantity } = req.body
 
-		console.log({ ...req.body, user: req.user })
+		console.log({ ...req.body, userId: req.userId })
 		if (!inventoryId || quantity <= 0) {
 			return res.json({
 				status: 'FAIL',
@@ -48,7 +47,7 @@ router.post('/addProduct', auth, async (req, res) => {
 			})
 		}
 
-		const user = await User.findByPk(req.user)
+		const user = await User.findByPk(req.userId)
 
 		if (!user) {
 			return res.json({ status: 'FAIL', message: 'Invalid user!' })
@@ -58,18 +57,18 @@ router.post('/addProduct', auth, async (req, res) => {
 		const cartExisted = await Cart.findOne({
 			where: {
 				inventoryId: inventoryId,
-				userId: req.user,
+				userId: req.userId,
 			},
 		})
 
 		// If product exist, update the increase quantity by new quantity
 		if (cartExisted) {
 			// Check quantity after plus is greater or equal than inventory mount
-			const inventory = await Inventory.findAll({
+			const inventory = await Inventory.findOne({
 				where: {
 					id: inventoryId,
 					amount: {
-						[Op.gte]: 1,
+						[Op.gte]: quantity + cartExisted.quantity,
 					},
 				},
 			})
@@ -87,7 +86,7 @@ router.post('/addProduct', auth, async (req, res) => {
 				{
 					where: {
 						inventoryId: inventoryId,
-						userId: req.user,
+						userId: req.userId,
 					},
 				}
 			)
@@ -105,8 +104,9 @@ router.post('/addProduct', auth, async (req, res) => {
 		}
 
 		// Check amount in stock is >= quantity
-		const inventory = await Inventory.findByPk(inventoryId, {
+		const inventory = await Inventory.findOne({
 			where: {
+				id: inventoryId,
 				amount: {
 					[Op.gte]: quantity,
 				},
@@ -115,13 +115,13 @@ router.post('/addProduct', auth, async (req, res) => {
 		if (!inventory) {
 			return res.json({
 				status: 'FAIL',
-				message: 'Số lượng sản phẩm muốn mua vượt quá số hàng trong kho!',
+				message: 'Số lượng sản phẩm trong kho không đủ!',
 			})
 		}
 
 		const newProduct = await Cart.create({
 			quantity: quantity,
-			userId: req.user,
+			userId: req.userId,
 			inventoryId: inventoryId,
 		})
 
@@ -139,36 +139,55 @@ router.post('/addProduct', auth, async (req, res) => {
 // @access  Private
 router.post('/changeQuantity', auth, async (req, res) => {
 	try {
-		// req.body.quantity is quantity after update
 		const { quantity, inventoryId } = req.body
 
-		// Check quantity > 0
-		if (quantity <= 0) {
+		const cartExisted = await Cart.findOne({
+			where: {
+				userId: req.userId,
+				inventoryId: inventoryId,
+			},
+		})
+
+		// Check cart existed
+		if (!cartExisted) {
 			return res.json({
 				status: 'FAIL',
-				message: 'Số lượng sản phẩm không hợp lệ!',
+				message: 'Product in cart not found!',
 			})
 		}
 
-		// Check amount in stock is >= quantity
-		const inventory = await Inventory.findByPk(inventoryId, {
-			where: {
-				amount: {
-					[Op.gte]: quantity,
+		// Add product
+		if (quantity > 0) {
+			// Check amount in stock is >= quantity
+			const inventory = await Inventory.findOne({
+				where: {
+					id: inventoryId,
+					amount: {
+						[Op.gte]: quantity + cartExisted.quantity,
+					},
 				},
-			},
-		})
-		if (!inventory) {
+			})
+
+			if (!inventory) {
+				return res.json({
+					status: 'FAIL',
+					message: 'Số lượng sản phẩm trong kho không đủ!',
+				})
+			}
+		}
+
+		// Reduce product
+		if (cartExisted.quantity + quantity <= 0) {
 			return res.json({
 				status: 'FAIL',
-				message: 'Số lượng sản phẩm trong kho không đủ!',
+				message: 'Product Quantity can not less or equal than 0!',
 			})
 		}
 
 		const rowUpdated = await Cart.update(
-			{ quantity: quantity },
+			{ quantity: cartExisted.quantity + quantity },
 			{
-				where: { inventoryId: inventoryId, userId: req.user },
+				where: { inventoryId: inventoryId, userId: req.userId },
 			}
 		)
 
@@ -194,11 +213,14 @@ router.delete('/', auth, async (req, res) => {
 		const { inventoryId } = req.body
 
 		const rowDeleted = await Cart.destroy({
-			where: { inventoryId: inventoryId, userId: req.user },
+			where: { inventoryId: inventoryId, userId: req.userId },
 		})
 
 		if (rowDeleted === 0) {
-			return res.json({ status: 'FAIL', message: 'No row is deleted!' })
+			return res.json({
+				status: 'FAIL',
+				message: 'No product in cart is deleted!',
+			})
 		} else {
 			return res.json({ status: 'SUCCESS' })
 		}

@@ -10,8 +10,9 @@ const auth = (req, res, next) => {
 				.json({ status: 'FAIL', message: 'There is no cooki!' })
 		}
 
-		const { user } = jwt.verify(token, process.env.JWT_SECRET)
-		req.user = user
+		const { userId, userRoles } = jwt.verify(token, process.env.JWT_SECRET)
+		req.userId = userId
+		req.userRoles = userRoles
 		next()
 	} catch (error) {
 		console.log(error)

@@ -1,16 +1,16 @@
 module.exports = function (sequelize, DataTypes) {
-	const OrderHistory = sequelize.define('orderHistory', {
+	const UserRole = sequelize.define('userRole', {
 		id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true,
 			allowNull: false,
 		},
-		// If not neccesary, the remove totalprice
-		totalPrice: {
-			type: DataTypes.INTEGER,
+		role: {
+			type: DataTypes.STRING,
+			allowNull: false,
 		},
 	})
 
-	return OrderHistory
+	return UserRole
 }

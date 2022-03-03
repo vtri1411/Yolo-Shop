@@ -145,7 +145,6 @@ router.post('/filter', async (req, res) => {
 					model: Brand,
 					required: true,
 					as: 'brand',
-					// atributes: [],
 				},
 				{
 					model: Category,
@@ -248,19 +247,18 @@ router.post('/', async (req, res) => {
 			unit,
 			price,
 			categoryId,
+			gender,
 			brandId,
-
 			images,
 			inventory,
 		} = req.body
-
-		console.log({ ...req.body })
 
 		const product = await Product.create({
 			name,
 			description,
 			available,
 			unit,
+			gender,
 			price,
 			categoryId,
 			brandId,

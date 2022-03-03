@@ -1,11 +1,13 @@
 import productTypes from './product.types'
-import axios from '../../config/axios'
+import axios from 'axios'
 import { toast } from 'react-toastify'
 import toastUpdate from '../../config/toastUpdate'
 
 export const getAllProducts = () => async (dispatch) => {
 	try {
 		const { data } = await axios.get('/product')
+
+		console.log({ data })
 
 		if (data.status === 'FAIL') {
 			toast.error('Lấy danh sách sản phẩm thất bại!')
