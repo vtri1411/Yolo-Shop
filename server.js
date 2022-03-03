@@ -17,11 +17,6 @@ app.use(
 	})
 )
 
-app.use((req, res, next) => {
-	console.log('client proxy')
-	next()
-})
-
 // Init Middleware
 app.use(express.json())
 app.use(cookieParser())

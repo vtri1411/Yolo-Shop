@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export const getAllCategory = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/category')
+		const { data } = await axios.get('/api/category')
 		if (data.status === 'FAIL') {
 			console.log(data.message)
 		} else {

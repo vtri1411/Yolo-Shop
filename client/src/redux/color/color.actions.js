@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export const getAllColor = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/color')
+		const { data } = await axios.get('/api/color')
 		if (data.status === 'FAIL') {
 			console.log(data.message)
 		} else {

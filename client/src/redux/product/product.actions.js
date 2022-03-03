@@ -5,7 +5,7 @@ import toastUpdate from '../../config/toastUpdate'
 
 export const getAllProducts = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/product')
+		const { data } = await axios.get('/api/product')
 
 		console.log({ data })
 
@@ -29,7 +29,7 @@ export const filterProducts =
 	async (dispatch) => {
 		console.log({ filter, keyword, sort })
 		try {
-			const { data } = await axios.post('/product/filter', {
+			const { data } = await axios.post('/api/product/filter', {
 				filter,
 				keyword,
 				sort,
@@ -53,7 +53,7 @@ export const filterProducts =
 
 export const getProductById = (id) => async (dispatch) => {
 	try {
-		const { data } = await axios.get(`/product/${id}`)
+		const { data } = await axios.get(`/api/product/${id}`)
 		if (data.status === 'SUCCESS') {
 			toast.success('Tải thông tin sản phẩm thành công!')
 			dispatch({
@@ -85,7 +85,7 @@ export const setProductModal = (id) => async (dispatch) => {
 			payload: true,
 		})
 
-		const { data } = await axios.get(`/product/${id}`)
+		const { data } = await axios.get(`/api/product/${id}`)
 
 		if (data.status === 'SUCCESS') {
 			toast.success('Tải thông tin sản phẩm thành công!')

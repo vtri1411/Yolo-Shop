@@ -3,7 +3,7 @@ import brandTypes from './brand.types'
 
 export const getAllBrand = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/brand')
+		const { data } = await axios.get('/api/brand')
 		if (data.status === 'FAIL') {
 			console.log(data.message)
 		} else {

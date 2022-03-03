@@ -5,7 +5,7 @@ import toastUpdate from '../../config/toastUpdate'
 
 export const loadUserCart = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/cart')
+		const { data } = await axios.get('/api/cart')
 		dispatch({
 			type: cartTypes.SET_USER_CART,
 			payload: data.payload,
