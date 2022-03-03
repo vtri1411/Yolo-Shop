@@ -1,5 +1,5 @@
 const express = require('express')
-require('dotenv').config({ path: './.env' })
+require('dotenv').config()
 const { urlencoded } = require('express')
 const cookieParser = require('cookie-parser')
 const db = require('./models/index')
@@ -11,6 +11,7 @@ const app = express()
 // Cors
 app.use(
 	cors({
+		// For reactjs
 		origin: 'http://localhost:3000',
 		credentials: true,
 	})
@@ -34,16 +35,12 @@ app.use('/api/category', require('./routes/category'))
 
 const PORT = process.env.PORT || 5000
 
-console.log({ env: process.env.NODE_ENV })
-
 // HOST
 if (process.env.NODE_ENV === 'production') {
-	app.use(express.static(path.join(__dirname, '..', 'client', 'build')))
-
-	console.log(path.join(__dirname, '..', 'client', 'build'))
+	app.use(express.static(path.join(__dirname, 'client', 'build')))
 
 	app.get('*', (req, res) => {
-		res.sendFile(path.join(__dirname, '..', 'client', 'build'))
+		res.sendFile(path.join(__dirname, 'client', 'build'))
 	})
 }
 

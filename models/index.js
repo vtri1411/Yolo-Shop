@@ -1,5 +1,7 @@
 const { DataTypes, Sequelize, Op, QueryTypes } = require('sequelize')
 
+console.log({ allEnv: process.env })
+
 const sequelize =
 	process.env.NODE_ENV === 'production'
 		? new Sequelize(
@@ -37,10 +39,12 @@ const sequelize =
 				}
 		  )
 
+console.log({ sequelize })
+
 sequelize
 	.authenticate()
 	.then(() => console.log('Mysql connecting . . .'))
-	.catch((error) => console.log(error))
+	.catch((error) => {})
 
 const db = {}
 db.sequelize = sequelize
@@ -112,11 +116,11 @@ const force = false
 
 db.sequelize
 	.sync({ force })
-	// .then(() =>
-	// 	sequelize.query(
-	// 		'CREATE FULLTEXT INDEX name_description_f_txt ON products(name,description)'
-	// 	)
-	// )
+	.then(() =>
+		sequelize.query(
+			'CREATE FULLTEXT INDEX name_description_f_txt ON products(name,description)'
+		)
+	)
 	.then(() => console.log(`Mysql are syncing with { force: ${force} } . . .`))
 	.catch((err) => console.log(err))
 
