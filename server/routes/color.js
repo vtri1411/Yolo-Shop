@@ -1,13 +1,14 @@
 const router = require('express').Router()
-const Color = require('../models/color')
+
+const { Color } = require('../models/index')
 
 // @route   GET api/size
 // @desc    Get collection size
 // @access  Public
 router.get('/', async (req, res) => {
 	try {
-		const size = await Color.find()
-		if (!size) {
+		const colors = await Color.findAll()
+		if (!colors) {
 			return res.json({
 				status: 'FAIL',
 				message: 'There is no record in color collecton!',
@@ -17,7 +18,7 @@ router.get('/', async (req, res) => {
 		return res.json({
 			status: 'SUCCESS',
 			message: 'Get color collection success',
-			payload: size,
+			payload: colors,
 		})
 	} catch (error) {
 		console.log(error)
@@ -39,8 +40,7 @@ router.post('/', async (req, res) => {
 			})
 		}
 
-		const color = new Color({ name: colorName, hex })
-		await color.save()
+		const color = await Color.create({ name: colorName, hex })
 
 		res.json({
 			status: 'SUCCESS',

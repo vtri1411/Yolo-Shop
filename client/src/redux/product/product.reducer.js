@@ -11,12 +11,12 @@ const initialState = {
 
 const productReducer = (state = initialState, action) => {
 	switch (action.type) {
-		case productTypes.GET_ALL_PRODUCT_SUCCESS:
+		case productTypes.SET_PRODUCTS:
 			return {
 				...state,
 				products: action.payload,
 			}
-		case productTypes.GET_PRODUCT_SUCCESS:
+		case productTypes.SET_PRODUCT:
 			return {
 				...state,
 				productDetail: action.payload,

@@ -26,10 +26,7 @@
 
 		&__btn {
 			@include flex(center, flex-end);
-			position: sticky;
 			background-color: transparent;
-			top: 0;
-			left: 0;
 		}
 
 		&__loading {

@@ -1,12 +1,13 @@
 const router = require('express').Router()
-const Category = require('../models/category')
+
+const { Category } = require('../models/index')
 
 // @route   GET api/category
 // @desc    Get collection category
 // @access  Public
 router.get('/', async (req, res) => {
 	try {
-		const category = await Category.find()
+		const category = await Category.findAll()
 		if (!category) {
 			return res.json({
 				status: 'FAIL',
@@ -30,17 +31,16 @@ router.get('/', async (req, res) => {
 // @access
 router.post('/', async (req, res) => {
 	try {
-		const { categoryName } = req.body
+		const { name } = req.body
 
-		if (!categoryName) {
+		if (!name) {
 			return res.json({
 				status: 'FAIL',
 				message: 'Tên loại không hợp lệ!',
 			})
 		}
 
-		const category = new Category({ name: categoryName })
-		await category.save()
+		const category = await Category.create({ name })
 
 		res.json({
 			status: 'SUCCESS',

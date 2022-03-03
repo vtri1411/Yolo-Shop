@@ -1,6 +1,6 @@
 .product {
 	@include flex();
-	padding: 2rem 0;
+	padding: 2rem 1rem;
 
 	@include sm {
 		flex-wrap: wrap;
@@ -9,8 +9,8 @@
 	&__imgs {
 		@include flex();
 		width: 60%;
-		padding: 0 2rem;
 		flex-wrap: wrap;
+		flex-shrink: 0;
 
 		@include sm {
 			width: 100%;
@@ -20,38 +20,58 @@
 		&__wrap {
 			@include flex();
 			width: 100%;
+			position: relative;
 		}
 
 		&__list {
-			width: 20%;
-			margin-right: 2rem;
+			position: absolute;
+			left: 0;
+			top: 0;
+			height: 100%;
+			width: 15%;
+			overflow-y: auto;
+
+			&::-webkit-scrollbar {
+				width: 5px;
+			}
+
+			&::-webkit-scrollbar-track {
+				box-shadow: none;
+			}
 
 			&__item {
-				& > * ~ * {
-					margin-top: 2rem;
+				& ~ & {
+					margin-top: 2px;
 				}
 
 				img {
+					display: block;
 					width: 100%;
 					cursor: pointer;
+					border: 2px solid transparent;
+					transition: border 0.3s ease-in;
 
 					&.active {
-						border: 1px solid $main-color;
+						border: 2px solid $main-color;
 					}
 				}
 			}
 		}
+
 		&__main {
-			width: 80%;
+			width: 100%;
+			padding-left: 16%;
+
+			img {
+				width: 100%;
+			}
 		}
 	}
 
 	&__desc {
 		width: 100%;
-		margin-top: 5rem;
+		margin-top: 8rem;
 		position: relative;
-		overflow: hidden;
-		max-height: 50rem;
 
 		&.mobile {
 			display: none;
@@ -62,42 +82,49 @@
 
 			&.mobile {
 				display: block;
-				margin-top: 3rem;
+				margin-top: 8rem;
 			}
-		}
-
-		&.active {
-			max-height: fit-content;
 		}
 
 		&__title {
 			font-size: 2.6rem;
 			font-weight: 600;
+			text-decoration: underline;
 		}
 
 		&__content {
-			font-family: 'Roboto', sans-serif;
 			font-size: 1.6rem;
 			line-height: 1.5;
 			margin-top: 2rem;
+			overflow: hidden;
+			max-height: 50rem;
+
+			&.active {
+				max-height: fit-content;
+			}
 		}
 
 		&__btn {
 			position: absolute;
 			bottom: 0;
 			left: 50%;
-			transform: translateX(-50%);
+			transform: translate(-50%, calc(100% + 6px));
 		}
 	}
 
 	&__info {
 		position: sticky;
-		top: calc(#{$header-shrink-height} + 50px);
-		padding: 0 2rem;
+		top: calc(#{$header-shrink-height});
+		flex-grow: 1;
+		margin-left: 3rem;
+
+		&.modal {
+			top: 0;
+		}
 
 		&__name {
-			font-size: 4rem;
-			font-weight: 400;
+			font-size: 3rem;
+			font-weight: 500;
 		}
 
 		&__item {
@@ -107,6 +134,22 @@
 				font-size: 2rem;
 				font-weight: 500;
 				margin-bottom: 1rem;
+			}
+
+			&__text {
+				font-size: 2rem;
+				font-weight: 500;
+				color: $main-color;
+
+				&.error {
+					color: $error-color;
+				}
+
+				&.minor {
+					font-size: 2rem;
+					font-weight: 500;
+					color: $txt-color-2;
+				}
 			}
 
 			&__list {
@@ -120,7 +163,7 @@
 					height: 40px;
 					border-radius: 50%;
 					cursor: pointer;
-					border: 2px solid $txt-color-2;
+					border: 3px solid $txt-color-2;
 
 					&.active,
 					&:hover {
@@ -136,7 +179,7 @@
 						width: 100%;
 						height: 100%;
 						border-radius: 50%;
-						font-size: 2.4rem;
+						font-size: 2rem;
 						text-transform: uppercase;
 						color: $txt-color-2;
 					}
@@ -152,12 +195,6 @@
 			& > *:first-child {
 				margin-right: 2rem;
 			}
-		}
-
-		&__price {
-			font-size: 3rem;
-			font-weight: 500;
-			color: $main-color;
 		}
 
 		@include sm {

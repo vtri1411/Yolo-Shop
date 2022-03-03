@@ -1,0 +1,140 @@
+.cart {
+	@include flex(flex-start, flex-start);
+
+	@include md {
+		flex-wrap: wrap;
+	}
+
+	&__info {
+		width: 30%;
+		margin-right: 30px;
+		padding: 20px;
+		margin-top: 30px;
+		box-shadow: $box-shadow;
+		position: sticky;
+		top: calc(#{$header-shrink-height} + 20px);
+
+		@include md {
+			width: 100%;
+			margin-right: 0;
+			margin-bottom: 30px;
+			position: unset;
+		}
+
+		&__txt {
+			& > * {
+				margin-bottom: 10px;
+			}
+
+			&__count {
+				font-size: 2rem;
+			}
+
+			&__price {
+				@include flex(center, space-between);
+				padding: 10px 0;
+				font-size: 2rem;
+
+				span:nth-child(2) {
+					font-size: 2rem;
+					color: $main-color;
+					font-weight: 600;
+				}
+			}
+		}
+
+		&__btn {
+			& > * {
+				margin-bottom: 20px;
+			}
+
+			&__item {
+				width: 100%;
+			}
+		}
+	}
+
+	&__list {
+		width: 60%;
+
+		@include md {
+			width: 100%;
+		}
+	}
+
+	&__item {
+		@include flex(center, flex-start);
+		margin-bottom: 20px;
+
+		&__image {
+			@include flex(center, center);
+			width: 20%;
+			flex-shrink: 0;
+			margin-right: 20px;
+
+			img {
+				display: block;
+				width: 100%;
+			}
+		}
+
+		&__info {
+			@include flex(center, space-between);
+			flex-grow: 1;
+
+			& > * {
+				margin-right: 10px;
+			}
+
+			@include md {
+				@include flex(flex-start, center);
+				flex-direction: column;
+
+				& > * {
+					margin-bottom: 10px;
+				}
+			}
+
+			&__name {
+				width: 40%;
+				text-transform: capitalize;
+
+				@include md {
+					width: 100%;
+				}
+			}
+
+			&__name {
+				font-size: 1.6rem;
+			}
+
+			&__price {
+				font-size: 2rem;
+			}
+
+			&__quantity {
+				width: 120px;
+				flex-shrink: 0;
+			}
+
+			&__del {
+				font-size: 2.8rem;
+
+				i {
+					cursor: pointer;
+
+					&:hover {
+						color: $main-color;
+					}
+				}
+			}
+
+			&__error {
+				&__icon {
+					margin-right: 4px;
+					transform: translateY(100px);
+				}
+			}
+		}
+	}
+}

@@ -8,7 +8,9 @@ const Button = (props) => {
 
 	return (
 		<button
-			className={`btn ${size} ${animate} ${props.className}`}
+			className={`btn ${size} ${animate} ${
+				props.className ? props.className : ''
+			}`}
 			onClick={props.onClick ? props.onClick : null}
 			style={props.style}
 		>

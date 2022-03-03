@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import 'swiper/swiper.min.css'
 import './assets/boxicons-2.0.7/css/boxicons.min.css'
@@ -14,9 +14,14 @@ import { getAllColor } from './redux/color/color.actions'
 import { getAllSize } from './redux/size/size.actions'
 import { getAllBrand } from './redux/brand/brand.actions'
 import { getAllProducts } from './redux/product/product.actions'
+import { loadUserCart, clearCart } from './redux/cart/cart.actions'
+
+const mapState = ({ user }) => ({ user: user.user })
 
 function App() {
 	const dispatch = useDispatch()
+
+	const { user } = useSelector(mapState)
 
 	useEffect(() => {
 		dispatch(loadUser())
@@ -25,7 +30,16 @@ function App() {
 		dispatch(getAllSize())
 		dispatch(getAllBrand())
 		dispatch(getAllProducts())
-	})
+	}, [])
+
+	useEffect(() => {
+		if (user) {
+			dispatch(loadUserCart())
+			console.log({ user })
+		} else {
+			dispatch(clearCart())
+		}
+	}, [user])
 
 	return <MainLayout />
 }

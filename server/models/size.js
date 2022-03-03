@@ -1,12 +1,13 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-
-const sizeSchema = new Schema({
-	name: {
-		type: String,
-		required: true,
-	},
-})
-
-const Size = mongoose.model('size', sizeSchema)
-module.exports = Size
+module.exports = function (sequelize, DataTypes) {
+	const Size = sequelize.define(
+		'size',
+		{
+			name: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+		},
+		{ timestamps: false }
+	)
+	return Size
+}

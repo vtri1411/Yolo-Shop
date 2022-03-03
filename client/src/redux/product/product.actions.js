@@ -3,60 +3,67 @@ import axios from '../../config/axios'
 import { toast } from 'react-toastify'
 import toastUpdate from '../../config/toastUpdate'
 
-export const getAllProducts =
-	({ filter, searchInput, sort } = {}) =>
-	async (dispatch) => {
-		console.log({ filter, searchInput, sort })
-		try {
-			const { data } = await axios.get('/product')
-
-			console.log({ data })
-
-			if (data.status === 'FAIL') {
-				console.log({ message: data.message })
-			} else {
-				console.log('dispatch')
-				dispatch({
-					type: productTypes.GET_ALL_PRODUCT_SUCCESS,
-					payload: data.payload,
-				})
-			}
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
-export const getProductById = (id) => async (dispatch) => {
-	const toastId = toast.loading(
-		'Đang tải thông tin sản phẩm, vui lòng chờ . . .'
-	)
+export const getAllProducts = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get(`/product/${id}`)
-		if (data.status === 'SUCCESS') {
-			toast.update(toastId, {
-				render: 'Tải thông tin sản phẩm thành công',
-				type: 'success',
-				...toastUpdate,
-			})
-			dispatch({
-				type: productTypes.GET_PRODUCT_SUCCESS,
-				payload: data.payload,
-			})
+		const { data } = await axios.get('/product')
+
+		if (data.status === 'FAIL') {
+			toast.error('Lấy danh sách sản phẩm thất bại!')
+			console.log(data.message)
 		} else {
-			toast.update(toastId, {
-				render: 'Tải thông tin sản phẩm thất bại, vui lòng thử lại',
-				type: 'error',
-				...toastUpdate,
+			dispatch({
+				type: productTypes.SET_PRODUCTS,
+				payload: data.payload,
 			})
 		}
 	} catch (error) {
 		console.log(error)
-		toast.update(toastId, {
-			render: 'Có lỗi xảy ra, vui lòng thử lại',
-			type: 'error',
-			...toastUpdate,
-		})
+		toast.error('Có lỗi xảy ra khi lấy danh sách sản phẩm!')
 	}
+}
+
+export const filterProducts =
+	({ filter, keyword, sort } = {}) =>
+	async (dispatch) => {
+		console.log({ filter, keyword, sort })
+		try {
+			const { data } = await axios.post('/product/filter', {
+				filter,
+				keyword,
+				sort,
+			})
+
+			console.log({ data })
+
+			if (data.status === 'SUCCESS') {
+				toast.success('Lọc sản phẩm thành công!')
+				dispatch({
+					type: productTypes.SET_PRODUCTS,
+					payload: data.payload,
+				})
+				return
+			}
+		} catch (error) {
+			console.log(error)
+		}
+		toast.error('Lọc sản phẩm thất bại!')
+	}
+
+export const getProductById = (id) => async (dispatch) => {
+	try {
+		const { data } = await axios.get(`/product/${id}`)
+		if (data.status === 'SUCCESS') {
+			toast.success('Tải thông tin sản phẩm thành công!')
+			dispatch({
+				type: productTypes.SET_PRODUCT,
+				payload: data.payload,
+			})
+			return
+		}
+	} catch (error) {
+		console.log(error)
+	}
+	toast.error('Tải thông tin sản phẩm thất bại!')
 }
 
 export const setShowProductModal = (isShow) => ({
@@ -70,7 +77,6 @@ export const setIsLoadingProductModal = (isLoading) => ({
 })
 
 export const setProductModal = (id) => async (dispatch) => {
-	const toastId = toast.loading('Đang tải sản phẩm, vui lòng chờ . . . ')
 	try {
 		dispatch({
 			type: productTypes.SET_SHOW_PRODUCT_MODAL,
@@ -78,22 +84,15 @@ export const setProductModal = (id) => async (dispatch) => {
 		})
 
 		const { data } = await axios.get(`/product/${id}`)
+
 		if (data.status === 'SUCCESS') {
-			toast.update(toastId, {
-				render: 'Tải sản phẩm thành công',
-				type: 'success',
-				...toastUpdate,
-			})
+			toast.success('Tải thông tin sản phẩm thành công!')
 			dispatch({
 				type: productTypes.SET_PRODUCT_MODEL,
 				payload: data.payload,
 			})
+			return
 		} else {
-			toast.update(toastId, {
-				render: 'Tải sản phẩm thất bại!',
-				type: 'error',
-				...toastUpdate,
-			})
 			dispatch({
 				type: productTypes.SET_SHOW_PRODUCT_MODAL,
 				payload: false,
@@ -101,10 +100,6 @@ export const setProductModal = (id) => async (dispatch) => {
 		}
 	} catch (error) {
 		console.log(error)
-		toast.update(toastId, {
-			render: 'Có lỗi xảy ra!',
-			type: 'error',
-			...toastUpdate,
-		})
 	}
+	toast.error('Tải thông tin sản phẩm thất bại!')
 }

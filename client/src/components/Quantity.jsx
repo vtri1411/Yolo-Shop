@@ -5,7 +5,7 @@ const Quantity = ({ handleChangeQuantity, quantity, size }) => {
 		<div className='quantity'>
 			<div
 				className={`quantity__btn ${size === 'sm' ? 'sm' : ''}`}
-				onClick={() => handleChangeQuantity('-', 1)}
+				onClick={() => handleChangeQuantity(-1)}
 			>
 				<i className='bx bx-minus'></i>
 			</div>
@@ -14,7 +14,7 @@ const Quantity = ({ handleChangeQuantity, quantity, size }) => {
 			</div>
 			<div
 				className={`quantity__btn ${size === 'sm' ? 'sm' : ''}`}
-				onClick={() => handleChangeQuantity('+', 1)}
+				onClick={() => handleChangeQuantity(1)}
 			>
 				<i className='bx bx-plus'></i>
 			</div>

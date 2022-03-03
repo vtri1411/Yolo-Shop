@@ -1,12 +1,15 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+module.exports = function (sequelize, DataTypes) {
+	const Brand = sequelize.define(
+		'brand',
+		{
+			name: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				unique: true,
+			},
+		},
+		{ timestamps: false }
+	)
 
-const brandSchema = new Schema({
-	name: {
-		type: String,
-		required: true,
-	},
-})
-
-const Brand = mongoose.model('brand', brandSchema)
-module.exports = Brand
+	return Brand
+}

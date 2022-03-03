@@ -10,11 +10,11 @@ const ProductList = ({ title, products }) => {
 		<Section>
 			{title && <SectionTitle>{title}</SectionTitle>}
 			<SectionBody>
-				<Grid col={4} mdCol={2} smCol={1} gap={10} rowGap={20}>
+				<Grid col={4} mdCol={2} smCol={1} gap={30} rowGap={20}>
 					{products?.map((item) => (
 						<ProductCard
-							key={item._id}
-							id={item._id}
+							key={item.id}
+							id={item.id}
 							name={item.name}
 							images={item.images}
 							price={item.price}

@@ -1,7 +1,10 @@
 .catalog {
 	position: relative;
 	display: flex;
-	flex-wrap: wrap;
+
+	@include sm {
+		flex-direction: column;
+	}
 
 	&__filter {
 		position: sticky;
@@ -9,8 +12,8 @@
 		left: 0;
 		width: 20%;
 		background-color: $main-bg;
-		overflow-y: auto;
-		height: fit-content;
+		flex-shrink: 0;
+		overflow: auto;
 
 		& > * ~ * {
 			margin-top: 2rem;
@@ -44,12 +47,16 @@
 
 			&__toggle {
 				display: block;
-				margin: 3rem 0 3rem 3rem;
+				margin: 3rem 0;
+				padding: 0 2rem;
 			}
 		}
 
 		@include sm {
 			top: $header-sm-height;
+			width: fit-content;
+			// margin-bottom: 3rem;
+			padding: 3rem 2rem 5rem;
 		}
 
 		&.active {
@@ -57,13 +64,21 @@
 		}
 
 		&__widget {
-			& > * ~ * {
-				margin-top: 1rem;
-			}
-
 			&__title {
 				font-size: 1.6rem;
 				font-weight: 500;
+				margin-bottom: 10px;
+			}
+
+			&__list {
+				display: flex;
+				width: 100%;
+				flex-wrap: wrap;
+
+				&__item {
+					margin-right: 15px;
+					margin-bottom: 15px;
+				}
 			}
 		}
 	}

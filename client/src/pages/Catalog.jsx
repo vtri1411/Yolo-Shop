@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { getAllProducts } from '../redux/product/product.actions'
+import {
+	filterProducts,
+	getAllProducts,
+} from '../redux/product/product.actions'
 
 import Helmet from '../components/Helmet'
 import CustomCheckbox from '../components/CustomCheckbox'
@@ -51,7 +54,7 @@ const Catalog = () => {
 	}
 	const [filter, setFilter] = useState(initialFilter)
 
-	const [searchInput, setSearchInput] = useState('')
+	const [keyword, setKeyword] = useState('')
 
 	const [sort, setSort] = useState('')
 
@@ -127,7 +130,7 @@ const Catalog = () => {
 	const handleFilter = (e) => {
 		e.preventDefault()
 
-		dispatch(getAllProducts({ filter, searchInput, sort }))
+		dispatch(filterProducts({ filter, keyword, sort }))
 	}
 
 	useEffect(() => {
@@ -158,8 +161,8 @@ const Catalog = () => {
 						<div className='catalog__filter__input'>
 							<Input
 								type={'text'}
-								value={searchInput}
-								onChange={(e) => setSearchInput(e.target.value)}
+								value={keyword}
+								onChange={(e) => setKeyword(e.target.value)}
 								placeholder={'Nhập từ khoá'}
 							/>
 						</div>
@@ -239,42 +242,24 @@ const FilterWidget = ({
 			<div className='catalog__filter__widget__title'>
 				<h3>{title}</h3>
 			</div>
-			{list?.map((item) => (
-				<div key={item._id} className='catalog__filter__widget__item'>
-					<CustomCheckbox
-						label={item.name}
-						checked={handleSetCheckFilter(item._id, type)}
-						onChange={(e) =>
-							handleChangeFilter(type, e.target.checked, item._id)
-						}
-					/>
-				</div>
-			))}
+			<div class='catalog__filter__widget__list'>
+				{list?.map((item) => (
+					<div
+						key={item.id}
+						className='catalog__filter__widget__list__item'
+					>
+						<CustomCheckbox
+							label={item.name}
+							checked={handleSetCheckFilter(item.id, type)}
+							onChange={(e) =>
+								handleChangeFilter(type, e.target.checked, item.id)
+							}
+						/>
+					</div>
+				))}
+			</div>
 		</div>
 	)
-}
-
-{
-	/* <div className='catalog__filter__widget'>
-	<div className='catalog__filter__widget__title'>
-		<h3>Danh mục sản phẩm</h3>
-	</div>
-	{categories?.map((item) => (
-		<div key={item._id} className='catalog__filter__widget__item'>
-			<CustomCheckbox
-				label={item.name}
-				checked={filter.category.some((e) => e === item._id)}
-				onChange={(e) =>
-					handleChangeFilter(
-						filterType.CATEGORY,
-						e.target.checked,
-						item._id
-					)
-				}
-			/>
-		</div>
-	))}
-</div> */
 }
 
 export default Catalog

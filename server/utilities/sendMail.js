@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer')
 const { google } = require('googleapis')
+const constants = require('../config/constants')
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
@@ -41,4 +42,41 @@ const sendMail = async ({ to, subject, text, html, amp }) => {
 	}
 }
 
-module.exports = sendMail
+const sendRecoveryMail = async (userId, email, secretString, redirectUrl) => {
+	const link = `${redirectUrl}/${userId}/${secretString}`
+
+	try {
+		await sendMail({
+			to: email,
+			subject: 'Khôi phục mật khẩu Yolo Shop của bạn',
+			text: `Đây là link khôi phục mật khẩu Yolo Shop của bạn: ${link}`,
+			html: `<p>
+               Đây là link khôi phục mật khẩu Yolo Shop của bạn: <a href='${link}' target='_blank'>Nhấn vào đây</a>
+               <p><strong>Lưu ý:</strong> Link này có hiệu lực trong <strong>1 giờ</strong> kể từ khi nó được gửi!</p>
+               </p>`,
+		})
+	} catch (error) {
+		throw error
+	}
+}
+
+const sendVerificationMail = async (userId, email, secretString) => {
+	// Send email to the user
+	const link = `${constants.ROOT_SERVER_URL}/api/user/verification/${userId}/${secretString}`
+
+	try {
+		await sendMail({
+			to: email,
+			subject: 'Xác thực tài khoản Yolo Shop của bạn',
+			text: `Đây là link xác thực tài khoản Yolo Shop của bạn: `,
+			html: `<p>
+               Đây là link xác thực tài khoản Yolo Shop của bạn: <a href='${link}' target='_blank'>Nhấn vào đây</a>
+               <p><strong>Lưu ý:</strong> Link này có hiệu lực trong <strong>6 giờ</strong> kể từ khi nó được gửi!</p>
+               </p>`,
+		})
+	} catch (error) {
+		throw error
+	}
+}
+
+module.exports = { sendMail, sendVerificationMail, sendRecoveryMail }

@@ -12,6 +12,7 @@ import screenWidth from '../screenWidth'
 import Button from './Button'
 import Quantity from './Quantity'
 import { logOutUser } from '../redux/user/user.actions'
+import { changeQuantity } from '../redux/cart/cart.actions'
 
 const nav = [
 	{
@@ -32,7 +33,11 @@ const nav = [
 	},
 ]
 
-const mapState = ({ user }) => ({ user: user.user, isLoading: user.isLoading })
+const mapState = ({ user, cart }) => ({
+	user: user.user,
+	isLoading: user.isLoading,
+	cart: cart.cart,
+})
 
 const Header = (props) => {
 	const dispatch = useDispatch()
@@ -43,7 +48,7 @@ const Header = (props) => {
 
 	const { pathname } = useLocation()
 
-	const { user, isLoading } = useSelector(mapState)
+	const { user, isLoading, cart } = useSelector(mapState)
 
 	const isSmallScreen = useMediaQuery({ maxWidth: screenWidth.sm })
 
@@ -57,7 +62,7 @@ const Header = (props) => {
 
 	const handleClickLogOut = useCallback(() => {
 		dispatch(logOutUser())
-	}, [dispatch])
+	}, [])
 
 	useEffect(() => {
 		const shrinkHeader = () => {
@@ -117,43 +122,68 @@ const Header = (props) => {
 						<div className='header__nav__item header__nav__icon header__nav__right__item header__nav__cart '>
 							<Link className='header__nav__cart__link' to='/cart'>
 								<i className='bx bx-shopping-bag'></i>
-								<div class='header__nav__cart__link__amount'>8</div>
+								{Array.isArray(cart) && (
+									<div className='header__nav__cart__link__amount'>
+										{cart.length}
+									</div>
+								)}
 							</Link>
-							<div
-								className={`header__nav__cart__panel ${
-									isSmallScreen ? 'hidden' : ''
-								}`}
-							>
-								<div className='header__nav__cart__panel__wrapper'>
-									{/* <div className='header__nav__cart__panel__empty'>
-									<img src={emptyCartImg} alt='Empty Cart' />
-								</div> */}
-									<div className='header__nav__cart__panel__product'>
-										<div className='header__nav__cart__panel__product__thumb'>
-											<Link to='/'>
-												<img src={emptyCartImg} alt='' />
-											</Link>
-										</div>
-										<div className='header__nav__cart__panel__product__name'>
-											<Link to={`/`}>
-												Sản phẩm 1 Lorem ipsum dolor sit amet
-												consectetur, adipisicing elit. Praesentium,
-												quibusdam.
-											</Link>
-										</div>
-										<div className='header__nav__cart__panel__product__quantity'>
-											<Quantity
-												handleChangeQuantity={() => {}}
-												quantity={1}
-												size='sm'
-											/>
-										</div>
-										<div className='header__nav__cart__panel__product__remove'>
-											<i className='bx bx-trash'></i>
-										</div>
+							{Array.isArray(cart) && (
+								<div
+									className={`header__nav__cart__panel ${
+										isSmallScreen ? 'hidden' : ''
+									}`}
+								>
+									<div className='header__nav__cart__panel__wrapper'>
+										{cart.length > 0 ? (
+											cart.map((item) => (
+												<div
+													key={item.inventoryId}
+													className='header__nav__cart__panel__product'
+												>
+													<div className='header__nav__cart__panel__product__thumb'>
+														<Link
+															to={`/product/${item.productId}`}
+														>
+															<img src={item.images[0]} alt='' />
+														</Link>
+													</div>
+													<div className='header__nav__cart__panel__product__name'>
+														<Link
+															to={`/product/${item.productId}`}
+														>
+															{item.name}
+														</Link>
+													</div>
+													<div className='header__nav__cart__panel__product__quantity'>
+														<Quantity
+															handleChangeQuantity={(value) => {
+																dispatch(
+																	changeQuantity({
+																		quantity:
+																			item.quantity + value,
+																		inventoryId:
+																			item.inventoryId,
+																	})
+																)
+															}}
+															quantity={item.quantity}
+															size='sm'
+														/>
+													</div>
+													<div className='header__nav__cart__panel__product__remove'>
+														<i className='bx bx-trash'></i>
+													</div>
+												</div>
+											))
+										) : (
+											<div className='header__nav__cart__panel__empty'>
+												<img src={emptyCartImg} alt='Empty Cart' />
+											</div>
+										)}
 									</div>
 								</div>
-							</div>
+							)}
 						</div>
 						<div
 							className={`header__nav__item header__nav__icon header__nav__right__item header__nav__auth ${

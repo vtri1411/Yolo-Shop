@@ -1,23 +1,25 @@
 const router = require('express').Router()
-const Brand = require('../models/brand')
+
+const { Brand } = require('../models/index')
 
 // @route   GET api/brand
-// @desc    Get brand collection
+// @desc    Get brand data
 // @access  Public
 router.get('/', async (req, res) => {
 	try {
-		const size = await Brand.find()
-		if (!size) {
+		const brands = await Brand.findAll()
+		if (!brands) {
 			return res.json({
 				status: 'FAIL',
 				message: 'There is no record in collecton brand!',
+				payload: brands,
 			})
 		}
 
 		return res.json({
 			status: 'SUCCESS',
 			message: 'Get brand collection success',
-			payload: size,
+			payload: brands,
 		})
 	} catch (error) {
 		console.log(error)
@@ -39,8 +41,7 @@ router.post('/', async (req, res) => {
 			})
 		}
 
-		const brand = new Brand({ name: brandName })
-		await brand.save()
+		const brand = await Brand.create({ name: brandName })
 
 		res.json({
 			status: 'SUCCESS',
@@ -48,7 +49,7 @@ router.post('/', async (req, res) => {
 			payload: brand,
 		})
 	} catch (error) {
-		console.log(error)
+		console.log(error.errors)
 		res.sendStatus(500)
 	}
 })

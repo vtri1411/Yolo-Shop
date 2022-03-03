@@ -1,35 +1,15 @@
-const express = require('express')
-const auth = require('../middlewares/auth')
-const User = require('../models/user')
-const router = express.Router()
-const bcryptjs = require('bcryptjs')
-const setAuthCooki = require('../utilities/setAuthCooki')
-const { checkIsEmail } = require('../utilities/validator')
+const router = require('express').Router()
 const axios = require('axios')
+const bcryptjs = require('bcryptjs')
+
 const constant = require('../config/constants')
 
-// @route   GET api/auth
-// @desc    Get user account
-// @access  Private
-router.get('/', auth, async (req, res) => {
-	try {
-		const user = await User.findById(req.user).select('-password')
+const auth = require('../middlewares/auth')
 
-		// If there is no user match with cooki, delete cooki
-		if (!user) {
-			res.cookie('jwt', '', { maxAge: 0, httpOnly: true })
-		}
+const { User } = require('../models/index')
 
-		res.json({
-			status: 'SUCCESS',
-			message: 'Get user success!',
-			payload: user,
-		})
-	} catch (error) {
-		console.log(error)
-		res.sendStatus(500)
-	}
-})
+const setAuthCooki = require('../utilities/setAuthCooki')
+const { checkIsEmail } = require('../utilities/validator')
 
 // @route   POST api/auth/login
 // @desc    Login a user
@@ -46,7 +26,7 @@ router.post('/login', async (req, res) => {
 			})
 		}
 
-		const user = await User.findOne({ email })
+		const user = await User.findOne({ where: { email } })
 
 		if (!user) {
 			return res.json({
@@ -67,14 +47,12 @@ router.post('/login', async (req, res) => {
 		if (user.verified === false) {
 			return res.json({
 				status: 'FAIL',
-				code: '003',
+				code: 603,
 				message: 'Email chưa được xác minh!',
 			})
 		}
 
-		setAuthCooki(res, user._id)
-
-		delete user._doc.password
+		setAuthCooki(res, user.id)
 
 		res.json({
 			status: 'SUCCESS',
@@ -106,45 +84,45 @@ router.get('/logout', (req, res) => {
 // @route   POST api/auth/oauth/google
 // @desc    Get user's google profile after get access token
 // @access  Public
-router.post('/oauth/google', async (req, res) => {
-	try {
-		const { access_token } = req.body
+// router.post('/oauth/google', async (req, res) => {
+// 	try {
+// 		const { access_token } = req.body
 
-		// Get user data from google api
-		const { data } = await axios.get(
-			`https://www.googleapis.com/oauth2/v1/userinfo?alt=json`,
-			/**
-			 * This is link without header to get user's profile
-			 * `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${access_token}`
-			 */
-			{
-				headers: { Authorization: `Bearer ${access_token}` },
-			}
-		)
+// 		// Get user data from google api
+// 		const { data } = await axios.get(
+// 			`https://www.googleapis.com/oauth2/v1/userinfo?alt=json`,
+// 			/**
+// 			 * This is link without header to get user's profile
+// 			 * `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${access_token}`
+// 			 */
+// 			{
+// 				headers: { Authorization: `Bearer ${access_token}` },
+// 			}
+// 		)
 
-		let user = await User.findOne({ email: data.email })
+// 		let user = await User.findOne({ email: data.email })
 
-		if (!user) {
-			user = new User({
-				email: data.email,
-				password: '',
-				name: data.name,
-				verified: true,
-			})
-			await user.save()
-		}
+// 		if (!user) {
+// 			user = new User({
+// 				email: data.email,
+// 				password: '',
+// 				name: data.name,
+// 				verified: true,
+// 			})
+// 			await user.save()
+// 		}
 
-		setAuthCooki(res, user._id)
+// 		setAuthCooki(res, user.id)
 
-		res.json({
-			status: 'SUCCESS',
-			message: 'Đăng nhập bằng google thành công!',
-			payload: user,
-		})
-	} catch (error) {
-		console.log(error)
-		res.sendStatus(500)
-	}
-})
+// 		res.json({
+// 			status: 'SUCCESS',
+// 			message: 'Đăng nhập bằng google thành công!',
+// 			payload: user,
+// 		})
+// 	} catch (error) {
+// 		console.log(error)
+// 		res.sendStatus(500)
+// 	}
+// })
 
 module.exports = router

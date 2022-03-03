@@ -1,17 +1,57 @@
-// const express = require('express')
-// const router = express.Router()
 const router = require('express').Router()
-const User = require('../models/user')
-const UserVerification = require('../models/userVerification')
-const UserRecovery = require('../models/userRecovery')
 const bcryptjs = require('bcryptjs')
-const setAuthCooki = require('../utilities/setAuthCooki')
-const { v4: uuidv4 } = require('uuid')
-const { Types } = require('mongoose')
+
 const constants = require('../config/constants')
-const sendVerificationMail = require('../utilities/sendVerificationMail')
-const sendMailRecoverySecretString = require('../utilities/sendMailRecoverySecretString')
+
+const auth = require('../middlewares/auth')
+
+const {
+	User,
+	UserRecovery,
+	UserVerification,
+	Cart,
+	Inventory,
+	Product,
+	Size,
+	Color,
+} = require('../models/index')
+
+const {
+	sendRecoveryMail,
+	sendVerificationMail,
+} = require('../utilities/sendMail')
 const createAndHashSecretString = require('../utilities/createAndHashSecretString')
+const setAuthCooki = require('../utilities/setAuthCooki')
+
+// @route   GET api/user
+// @desc    Get user's account detail
+// @access  Private
+router.get('/', auth, async (req, res) => {
+	try {
+		const user = await User.findByPk(req.user, {
+			attributes: { exclude: ['password'] },
+		})
+
+		// If there is no user match with cookie, delete cookie
+		if (!user) {
+			res.cookie('jwt', '', { maxAge: 0, httpOnly: true })
+
+			return res.json({
+				status: 'FAIL',
+				message: 'Cookie không hợp lệ!',
+			})
+		}
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Get user success!',
+			payload: user,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
 
 // @route   POST api/user
 // @desc    Create a new user
@@ -19,14 +59,14 @@ const createAndHashSecretString = require('../utilities/createAndHashSecretStrin
 router.post('/', async (req, res) => {
 	try {
 		const { email, password } = req.body
-		let user = await User.findOne({ email })
-		const promises = []
+		let user = await User.findOne({ where: { email: email } })
 
 		// Check if user exist
 		if (user) {
 			return res.json({
 				status: 'FAIL',
 				message: 'Tài khoản đã tồn tại!',
+				user,
 			})
 		}
 
@@ -36,38 +76,45 @@ router.post('/', async (req, res) => {
 			constants.TIMES_GEN_SALT
 		)
 
-		user = new User({ email, password: hashPassword, verified: false })
-
-		// Create secretString and hash it
-		const secretString = uuidv4() + user._id
-		const hashString = bcryptjs.hashSync(
-			secretString,
-			constants.TIMES_GEN_SALT
+		// Create and save user to database
+		user = await User.create(
+			{
+				email,
+				password: hashPassword,
+				verified: false,
+			},
+			{
+				attributes: {
+					exclude: ['password'],
+				},
+			}
 		)
 
-		// Save user to database
-		promises.push(user.save())
+		// Create secretString and hash it
+		const { secretString, hashString } = createAndHashSecretString(user.id)
+		console.log({ secretString, hashString })
 
-		// Save verification user to database
-		const verificationUser = new UserVerification({
-			userId: user._id,
-			expiredDate:
-				Date.now() + Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
-			secretString: hashString,
+		// Save verification user to database adn Send email to user
+		await Promise.all([
+			UserVerification.create({
+				userId: user.id,
+				expiredAt:
+					Date.now() +
+					Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
+				secret: hashString,
+			}),
+			sendVerificationMail(user.id, email, secretString),
+		])
+
+		// Response the status
+		res.json({
+			status: 'SUCCESS',
+			message: 'Đăng ký tài khoản thành công!',
+			payload: user,
 		})
-		promises.push(verificationUser.save())
-
-		// Send email to user
-		promises.push(sendVerificationMail(user._id, email, secretString))
-
-		// Wait for saving user, verification user, sending email
-		await Promise.all(promises)
-
-		// Response the user
-		res.json({ status: 'SUCCESS', message: 'Đăng ký tài khoản thành công!' })
 	} catch (error) {
 		console.log(error)
-		res.sendStatus(500)
+		res.json({ status: 'FAIL', code: 500 })
 	}
 })
 
@@ -78,37 +125,38 @@ router.post('/verification/resend', async (req, res) => {
 	try {
 		const { email } = req.body
 
-		const user = await User.findOne({ email })
+		const user = await User.findOne({ where: { email }, raw: true })
 
 		// If user is not exist
 		if (!user) {
 			return res.json({
 				status: 'FAIL',
-				code: '001',
+				code: 601,
 				message: 'Email không tồn tại trong hệ thống!',
 			})
 		}
 
 		// Delete all verified record of this user
-		await UserVerification.deleteMany({ userId: user._id })
+		await UserVerification.destroy({ where: { userId: user.id } })
 
-		const { hashString, secretString } = createAndHashSecretString(user._id)
+		// Create secret string and hashe it
+		const { hashString, secretString } = createAndHashSecretString(user.id)
 
-		// Save secret string hashed to database
-		const userVerification = new UserVerification({
-			userId: user._id,
-			expiredDate:
-				Date.now() + Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
-			secretString: hashString,
-		})
-
+		// Save secret string hashed to database, send email to user
 		await Promise.all([
-			sendVerificationMail(user._id, email, secretString),
-			userVerification.save(),
+			sendVerificationMail(user.id, email, secretString),
+			UserVerification.create({
+				userId: user.id,
+				expiredAt:
+					Date.now() +
+					Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
+				secret: hashString,
+			}),
 		])
 
 		res.json({
 			status: 'SUCCESS',
+			payload: user,
 		})
 	} catch (error) {
 		console.log(error)
@@ -119,10 +167,10 @@ router.post('/verification/resend', async (req, res) => {
 // @route   GET api/user/verification/:userId/:secretString
 // @desc    Verify user
 // @access  Public
-router.get('/verification/:id/:string', async (req, res) => {
+router.get('/verification/:id/:secret', async (req, res) => {
 	try {
-		const { id, string } = req.params
-		const user = await User.findById(id)
+		const { id, secret } = req.params
+		const user = await User.findByPk(id)
 
 		// If user not exists, or has been verified
 		//    response code 400
@@ -135,22 +183,22 @@ router.get('/verification/:id/:string', async (req, res) => {
 
 		// Get user verification from database
 		const userVerification = await UserVerification.findOne({
-			userId: Types.ObjectId(id),
+			where: { userId: user.id },
 		})
 
 		// Check if verification is expired
-		if (Date.now() > userVerification.expiredDate) {
+		if (Date.now() > userVerification.expiredAt) {
 			// @TODO Do something when user verification expired
 			return res.json({ status: 'FAIL', message: 'Xác nhận đã hết hạn!' })
 		}
 
-		// Compare user's input string with verification string from database
-		if (bcryptjs.compareSync(string, userVerification.secretString)) {
+		// Compare user's input secret with verification secret from database
+		if (bcryptjs.compareSync(secret, userVerification.secret)) {
 			// If corrects, update user's verified to true,
 			//    and delete all user verification from database
 			await Promise.all([
-				User.findOneAndUpdate({ _id: id }, { verified: true }),
-				UserVerification.deleteMany({ userId: id }),
+				User.update({ verified: true }, { where: { id } }),
+				UserVerification.destroy({ where: { userId: id } }),
 			])
 
 			setAuthCooki(res, id)
@@ -161,7 +209,7 @@ router.get('/verification/:id/:string', async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message:
-					'Comparison failed, unique string is not equal with hash string!',
+					'Comparison failed, unique secret is not equal with hash secret!',
 			})
 		}
 	} catch (error) {
@@ -176,47 +224,31 @@ router.get('/verification/:id/:string', async (req, res) => {
 router.post('/recovery/request', async (req, res) => {
 	try {
 		const { email, redirectUrl } = req.body
-		const user = await User.findOne({ email })
-		const promises = []
+		const user = await User.findOne({ where: { email: email } })
 
 		if (!user || !user.verified) {
 			return res.json({
 				status: 'FAIL',
-				message:
-					'Email is not exist on the database or has not been verified!',
+				message: 'Email không tồn tại hoặc đã được xác minh!',
 			})
 		}
 
-		// Delete all request reset password before of this user
-		await UserRecovery.deleteMany({ userId: user._id })
+		// Delete all request reset password of this user
+		await UserRecovery.destroy({ where: { userId: user.id } })
 
 		// Create and hash secret string
-		const secretString = uuidv4() + user._id
-		const hashString = bcryptjs.hashSync(
-			secretString,
-			constants.TIMES_GEN_SALT
-		)
+		const { secretString, hashString } = createAndHashSecretString(user.id)
 
-		// Send email for user
-		promises.push(
-			sendMailRecoverySecretString(
-				user._id,
-				email,
-				secretString,
-				redirectUrl
-			)
-		)
-
-		// Create new recovery
-		const userRecovery = new UserRecovery({
-			userId: user._id,
-			expiredDate:
-				Date.now() + Number.parseInt(process.env.RECOVERY_EXPIRES_TIME),
-			secretString: hashString,
-		})
-		promises.push(userRecovery.save())
-
-		await Promise.all(promises)
+		// Send email for user and Create new recovery recored
+		await Promise.all([
+			sendRecoveryMail(user.id, email, secretString, redirectUrl),
+			UserRecovery.create({
+				userId: user.id,
+				expiredAt:
+					Date.now() + Number.parseInt(process.env.RECOVERY_EXPIRES_TIME),
+				secret: hashString,
+			}),
+		])
 
 		res.json({ status: 'SUCCESS', message: 'User recovery password success' })
 	} catch (error) {
@@ -232,17 +264,20 @@ router.post('/recovery/reset', async (req, res) => {
 	try {
 		const { userId, secretString, newPassword } = req.body
 
-		const userRecovery = await UserRecovery.findOne({ userId })
+		const userRecovery = await UserRecovery.findOne({
+			where: { userId },
+		})
 
 		if (!userRecovery) {
 			return res.json({
 				status: 'FAIL',
-				message: 'User id is not match with any record of user recovery!',
+				message: 'Tài khoản không hợp lệ!',
 			})
 		}
 
-		if (Date.now() > userRecovery.expiredDate) {
-			await UserRecovery.deleteOne({ userId })
+		if (Date.now() > userRecovery.expiredAt) {
+			await UserRecovery.destroy({ where: { userId } })
+
 			return res.json({
 				status: 'FAIL',
 				message:
@@ -251,31 +286,40 @@ router.post('/recovery/reset', async (req, res) => {
 			})
 		}
 
-		if (bcryptjs.compareSync(secretString, userRecovery.secretString)) {
-			const hashPassword = bcryptjs.hashSync(
-				newPassword,
-				constants.TIMES_GEN_SALT
-			)
-			const user = await User.findOneAndUpdate(
-				{ _id: Types.ObjectId(userId) },
-				{ password: hashPassword },
-				{ new: true, projection: { password: -1 } }
-			)
-
-			// Create and set jwt cooki
-			setAuthCooki(res, userId)
-
-			res.json({
-				status: 'SUCCESS',
-				message: 'Recovery password success',
-				payload: user,
-			})
-		} else {
-			res.json({
+		// Check secret strinng
+		if (!bcryptjs.compareSync(secretString, userRecovery.secret)) {
+			return res.json({
 				status: 'FAIL',
-				message: 'Vui lòng vào link của mail mới nhất !',
+				message:
+					'Liên kết không hợp lệ, vui lòng vào liên kết của mail mới nhất!',
 			})
 		}
+
+		const hashPassword = bcryptjs.hashSync(
+			newPassword,
+			constants.TIMES_GEN_SALT
+		)
+
+		// Update password and delete all recovery records
+		const [rowEffected] = await Promise.all([
+			User.update({ password: hashPassword }, { where: { id: userId } }),
+			UserRecovery.destroy({ where: { userId } }),
+		])
+
+		if (rowEffected === 0) {
+			return res.json({
+				status: 'FAIL',
+				message: 'Id tài khoản không hợp lệ!',
+			})
+		}
+
+		// Create and set jwt cooki
+		setAuthCooki(res, userId)
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Recovery password success',
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)

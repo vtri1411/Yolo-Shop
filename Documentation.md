@@ -1,10 +1,10 @@
 ## Error status
 
-1. 001: Error email
-2. 002: Error password
-3. 003: Email unverified
-4. 004: Expired time
+# Code is number type
+
+1. 601: Error email
+2. 602: Error password
+3. 603: Email unverified
+4. 604: Expired time
 
 ## Note when deploy:
-
-1. Create index text for mongodb (google this keyword: $text)

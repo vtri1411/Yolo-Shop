@@ -5,7 +5,7 @@ import toastUpdate from '../../config/toastUpdate'
 
 export const loadUser = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/auth')
+		const { data } = await axios.get('/user')
 		dispatch({
 			type: userTypes.LOAD_USER_SUCCESS,
 			payload: data.payload,
@@ -32,7 +32,7 @@ export const logOutUser = () => async (dispatch) => {
 }
 
 export const loginUser =
-	({ email, password }, callback, history) =>
+	({ email, password }, history) =>
 	async (dispatch) => {
 		const toastId = toast.loading('Please wait . . .')
 
@@ -68,9 +68,10 @@ export const loginUser =
 					render: data.message,
 					type: 'error',
 					...toastUpdate,
+					autoClose: 5000,
 				})
 
-				if (data.code === '003') {
+				if (data.code === 603) {
 					dispatch({
 						type: userTypes.SET_VERIFICATION_EMAIL,
 						payload: email,
@@ -144,7 +145,7 @@ export const setVerificationEmail = (email) => ({
 })
 
 export const reSendVerificationEmail = (email) => async (dispatch) => {
-	const toastId = toast.loading('Đang đăng ký, vui lòng chờ . . .')
+	const toastId = toast.loading('Đang gửi mail, vui lòng chờ . . .')
 
 	try {
 		const { data } = await axios.post('/user/verification/resend', {
@@ -153,7 +154,7 @@ export const reSendVerificationEmail = (email) => async (dispatch) => {
 
 		if (data.status === 'SUCCESS') {
 			toast.update(toastId, {
-				render: 'Đăng ký thành công',
+				render: 'Gửi mail thành công, vui lòng kiểm tra email của bạn!',
 				type: 'success',
 				...toastUpdate,
 			})
@@ -171,7 +172,7 @@ export const reSendVerificationEmail = (email) => async (dispatch) => {
 	} catch (error) {
 		console.log(error)
 		toast.update(toastId, {
-			render: 'Server đang gặp lỗi xin vui lòng thử lại sau !',
+			render: 'Có lỗi xảy ra khi gửi mail!',
 			type: 'error',
 			isLoading: false,
 			hideProgressBar: false,

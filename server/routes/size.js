@@ -1,12 +1,14 @@
 const router = require('express').Router()
-const Size = require('../models/size')
+
+const { Size } = require('../models/index')
 
 // @route   GET api/size
-// @desc    Get collection size
+// @desc    Get all size
 // @access  Public
 router.get('/', async (req, res) => {
 	try {
-		const size = await Size.find()
+		const size = await Size.findAll()
+
 		if (!size) {
 			return res.json({
 				status: 'FAIL',
@@ -30,17 +32,16 @@ router.get('/', async (req, res) => {
 // @access
 router.post('/', async (req, res) => {
 	try {
-		const { sizeName } = req.body
+		const { name } = req.body
 
-		if (!sizeName) {
+		if (!name) {
 			return res.json({
 				status: 'FAIL',
-				message: 'Tên loại không hợp lệ!',
+				message: 'Tên size không hợp lệ!',
 			})
 		}
 
-		const size = new Size({ name: sizeName })
-		await size.save()
+		const size = await Size.create({ name: name })
 
 		res.json({
 			status: 'SUCCESS',

@@ -60,8 +60,8 @@ const InfinityList = ({ products }) => {
 				{products &&
 					products.map((item) => (
 						<ProductCard
-							key={item._id}
-							_id={item._id}
+							key={item.id}
+							id={item.id}
 							name={item.name}
 							images={item.images}
 							price={item.price}

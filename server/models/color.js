@@ -1,16 +1,19 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-
-const colorSchema = new Schema({
-	name: {
-		type: String,
-		required: true,
-	},
-	hex: {
-		type: String,
-		required: true,
-	},
-})
-
-const Color = mongoose.model('color', colorSchema)
-module.exports = Color
+module.exports = function (sequelize, DataTypes) {
+	const Color = sequelize.define(
+		'color',
+		{
+			name: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				unique: true,
+			},
+			hex: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				unique: true,
+			},
+		},
+		{ timestamps: false }
+	)
+	return Color
+}

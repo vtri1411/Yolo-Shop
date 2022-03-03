@@ -1,21 +1,60 @@
-const express = require('express')
-const router = express.Router()
-const Product = require('../models/product')
-const getAggregate = require('../utilities/getAggregate')
-const Types = require('mongoose').Types
+const router = require('express').Router()
+
+const {
+	Product,
+	Brand,
+	Category,
+	Image,
+	Inventory,
+	Size,
+	Color,
+	Op,
+	Sequelize,
+} = require('../models/index')
+const getOrderObject = require('../utilities/getOrderObject')
 
 // @route   GET api/product
 // @desc    Get products
 // @access  Public
 router.get('/', async (req, res) => {
 	try {
-		const products = await Product.find()
+		const products = await Product.findAll({
+			include: [
+				{
+					model: Brand,
+					required: true,
+				},
+				{
+					model: Category,
+					required: true,
+				},
+				{
+					model: Image,
+					required: true,
+					attributes: ['url'],
+				},
+				{
+					model: Inventory,
+					required: true,
+					include: [
+						{
+							model: Color,
+							required: true,
+						},
+						{
+							model: Size,
+							required: true,
+						},
+					],
+				},
+			],
+		})
+
 		res.json({
 			status: 'SUCCESS',
 			message: 'Lấy danh sách sản phẩm thành công!',
 			payload: products,
 		})
-		await Product.updateMany({}, { createAt: Date.now() })
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
@@ -28,9 +67,122 @@ router.get('/', async (req, res) => {
 router.post('/filter', async (req, res) => {
 	try {
 		const { filter, sort, keyword } = req.body
-		const aggregate = getAggregate({ filter, keyword, sort })
-		const result = await Product.aggregate(aggregate)
-		return res.json(result)
+		const { color, size, brand, category } = filter ? filter : {}
+
+		console.log({ filter, sort, keyword })
+
+		const where = []
+		const order = {}
+
+		if (Array.isArray(color) && color.length > 0) {
+			const colorFilter = []
+			color.forEach((item) => {
+				colorFilter.push({
+					['$inventories.color.id$']: item,
+				})
+			})
+
+			where.push({
+				[Op.or]: colorFilter,
+			})
+		}
+		if (Array.isArray(size) && size.length > 0) {
+			const sizeFilter = []
+
+			size.forEach((item) => {
+				sizeFilter.push({
+					['$inventories.size.id$']: item,
+				})
+			})
+			where.push({
+				[Op.or]: sizeFilter,
+			})
+		}
+		if (Array.isArray(brand) && brand.length > 0) {
+			const brandFilter = []
+
+			brand.forEach((item) => {
+				brandFilter.push({
+					['$brand.id$']: item,
+				})
+			})
+			where.push({
+				[Op.or]: brandFilter,
+			})
+		}
+		if (Array.isArray(category) && category.length > 0) {
+			const categoryFilter = []
+			category.forEach((item) => {
+				categoryFilter.push({
+					['$category.id$']: item,
+				})
+			})
+			where.push({
+				[Op.or]: categoryFilter,
+			})
+		}
+
+		if (keyword) {
+			where.push(
+				Sequelize.literal(
+					`MATCH (product.name,product.description) AGAINST ("${keyword}" IN NATURAL LANGUAGE MODE)`
+				)
+			)
+		}
+
+		if (sort) {
+			order.order = getOrderObject(sort)
+		}
+
+		console.log({ where, order })
+
+		const products = await Product.findAll({
+			where: {
+				[Op.and]: where,
+			},
+			include: [
+				{
+					model: Brand,
+					required: true,
+					as: 'brand',
+					// atributes: [],
+				},
+				{
+					model: Category,
+					required: true,
+					as: 'category',
+				},
+				{
+					model: Image,
+					required: true,
+					as: 'images',
+				},
+				{
+					model: Inventory,
+					required: true,
+					as: 'inventories',
+					include: [
+						{
+							model: Color,
+							required: true,
+							as: 'color',
+						},
+						{
+							model: Size,
+							required: true,
+							as: 'size',
+						},
+					],
+				},
+			],
+			...order,
+		})
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Lấy danh sách sản phẩm thành công!',
+			payload: products,
+		})
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)
@@ -42,85 +194,41 @@ router.post('/filter', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
 	try {
-		const product = await Product.aggregate([
-			{
-				$match: {
-					_id: Types.ObjectId(req.params.id),
+		const product = await Product.findByPk(req.params.id, {
+			include: [
+				{
+					model: Brand,
+					required: true,
 				},
-			},
-			{
-				$unwind: '$inventory',
-			},
-			{
-				$lookup: {
-					from: 'colors',
-					localField: 'inventory.color',
-					foreignField: '_id',
-					as: 'inventory.color',
+				{
+					model: Category,
+					required: true,
 				},
-			},
-			{
-				$unwind: '$inventory.color',
-			},
-			{
-				$unwind: '$inventory.size',
-			},
-			{
-				$lookup: {
-					from: 'sizes',
-					localField: 'inventory.size',
-					foreignField: '_id',
-					as: 'inventory.size',
+				{
+					model: Image,
+					required: true,
 				},
-			},
-			{
-				$unwind: '$inventory.size',
-			},
-			{
-				$group: {
-					_id: '$_id',
-					name: {
-						$first: '$name',
-					},
-					images: {
-						$first: '$images',
-					},
-					category: {
-						$first: '$category',
-					},
-					brand: {
-						$first: '$brand',
-					},
-					description: {
-						$first: '$description',
-					},
-					available: {
-						$first: '$available',
-					},
-					unit: {
-						$first: '$unit',
-					},
-					price: {
-						$first: '$price',
-					},
-					inventory: {
-						$push: '$$ROOT.inventory',
-					},
+				{
+					model: Inventory,
+					required: true,
+					include: [
+						{
+							model: Size,
+							required: true,
+						},
+						{
+							model: Color,
+							required: true,
+						},
+					],
 				},
-			},
-		])
+			],
+		})
 
-		if (product.length === 1) {
-			return res.json({
-				status: 'SUCCESS',
-				message: 'Lấy thông tin chi tiết của sản phẩm thành công!',
-				payload: product[0],
-			})
+		if (product) {
+			res.json({ status: 'SUCCESS', payload: product })
 		} else {
-			return res.json({
-				status: 'FAIL',
-				message: 'Lấy thông tin chi tiết của sản phẩm thất bại!',
-			})
+			res.json({ status: 'FAIL', message: 'Id không hợp lệ' })
 		}
 	} catch (error) {
 		console.log(error)
@@ -135,31 +243,53 @@ router.post('/', async (req, res) => {
 	try {
 		const {
 			name,
-			images,
-			category,
-			brand,
+			description,
 			available,
 			unit,
 			price,
-			description,
+			categoryId,
+			brandId,
+
+			images,
 			inventory,
 		} = req.body
 
 		console.log({ ...req.body })
 
-		const product = new Product({
+		const product = await Product.create({
 			name,
-			images,
-			category,
-			brand,
+			description,
 			available,
 			unit,
 			price,
-			description,
-			inventory,
+			categoryId,
+			brandId,
 		})
 
-		await product.save()
+		// Upload image
+		if (Array.isArray(images)) {
+			const promises = []
+			images.forEach((image) => {
+				promises.push(Image.create({ url: image, productId: product.id }))
+			})
+			await Promise.all(promises)
+		}
+
+		// Add product in inventory
+		if (Array.isArray(inventory)) {
+			const promises = []
+			inventory.forEach((item) => {
+				promises.push(
+					Inventory.create({
+						amount: item.amount,
+						sizeId: item.size,
+						colorId: item.color,
+						productId: product.id,
+					})
+				)
+			})
+			await Promise.all(promises)
+		}
 
 		res.json({
 			status: 'SUCCESS',

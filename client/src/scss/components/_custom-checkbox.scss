@@ -18,6 +18,10 @@
 		}
 	}
 
+	&__txt {
+		text-transform: capitalize;
+	}
+
 	&:hover {
 		color: $main-color;
 	}

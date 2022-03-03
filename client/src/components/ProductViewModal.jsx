@@ -42,7 +42,7 @@ const ProductViewModal = (props) => {
 						/>
 					</div>
 				) : (
-					productModal && <ProductView product={productModal} />
+					productModal && <ProductView product={productModal} isModal />
 				)}
 			</div>
 		</div>

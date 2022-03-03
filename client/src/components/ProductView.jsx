@@ -1,23 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, useHistory } from 'react-router-dom'
 
 import { toast } from 'react-toastify'
 
 import Button from '../components/Button'
 import Quantity from '../components/Quantity'
+import { addProduct } from '../redux/cart/cart.actions'
 import { getProductById } from '../redux/product/product.actions'
+import numberWithCommas from '../utilities/numberWithCommas'
 
 const mapState = ({ color }) => ({ colors: color.colors })
 
-const ProductView = ({ product }) => {
-	const { colors } = useSelector(mapState)
+const ProductView = ({ product, isModal }) => {
+	const dispatch = useDispatch()
 
-	const [mainImg, setMainImg] = useState(product.images[0])
+	const history = useHistory()
+
+	const [mainImg, setMainImg] = useState(product.images[0].url)
 
 	const [color, setColor] = useState('')
 
 	const [size, setSize] = useState('')
+
+	const [amount, setAmount] = useState(-1)
 
 	const [quantity, setQuantity] = useState(1)
 
@@ -28,16 +34,27 @@ const ProductView = ({ product }) => {
 	const { productColors, productSizes } = useMemo(() => {
 		const tempColors = []
 		const tempSizes = []
-		if (Array.isArray(product.inventory)) {
-			product.inventory.forEach((item) => {
-				if (!color || item.color._id === color) {
-					if (!tempSizes.includes(item.size._id)) {
+		if (Array.isArray(product.inventories)) {
+			product.inventories.forEach((item) => {
+				// If there is no color, or this elem of inventory
+				// has this color, so add size to tempSize
+				if (!color || item.color.id === color) {
+					// Check if tempSize have already had this size
+					if (
+						tempSizes.length === 0 ||
+						!tempSizes.some((tempSize) => tempSize.id === item.size.id)
+					) {
 						tempSizes.push(item.size)
 					}
 				}
 
-				if (!size || item.size._id === size) {
-					if (!tempSizes.includes(item.color._id)) {
+				if (!size || item.size.id === size) {
+					if (
+						tempColors.length === 0 ||
+						!tempColors.some(
+							(tempColor) => tempColor.id === item.color.id
+						)
+					) {
 						tempColors.push(item.color)
 					}
 				}
@@ -46,12 +63,25 @@ const ProductView = ({ product }) => {
 		return { productColors: tempColors, productSizes: tempSizes }
 	}, [product, size, color])
 
-	const handleChangeQuantity = (type, value) => {
-		if (type === '+') {
-			setQuantity(quantity + value)
-		} else if (type === '-') {
-			setQuantity(quantity - value < 1 ? quantity : quantity - value)
+	console.log({ product })
+
+	const handleChangeQuantity = (value) => {
+		if (color === '') {
+			toast.error('Vui lòng chọn màu sắc trước!')
+			return false
 		}
+		if (size === '') {
+			toast.error('Vui lòng chọn size trước!')
+			return false
+		}
+
+		setQuantity(
+			quantity + value < amount
+				? quantity + value > 0
+					? quantity + value
+					: quantity
+				: quantity
+		)
 	}
 
 	const check = () => {
@@ -70,60 +100,66 @@ const ProductView = ({ product }) => {
 		return true
 	}
 
-	const goToCart = () => {
+	const handleBuyProduct = () => {
 		if (check()) {
-			console.log('ok go cart')
-		} else {
-			console.log('err go cart')
+			handleAddProduct()
+			history.push('/cart')
 		}
 	}
 
-	const addToCart = () => {
+	const handleAddProduct = () => {
 		if (check()) {
-			console.log('ok add cart')
-		} else {
-			console.log('err add cart')
+			const inventory = product.inventories.find(
+				(item) => item.colorId === color && item.sizeId === size
+			)
+			dispatch(addProduct({ inventoryId: inventory.id, quantity }))
 		}
 	}
+
+	// When user choose size and color
+	// Loop through inventories to find which user choose
+	// Get amount in stock of that product and display it
+	useEffect(() => {
+		if (!color || !size) {
+			setAmount(-1)
+		} else {
+			const temp = product.inventories.find(
+				(item) => item.color.id === color && item.size.id === size
+			)
+			setAmount(temp.amount)
+		}
+	}, [color, product, size])
 
 	return (
 		<div className='product'>
 			<div className='product__imgs'>
 				<div className='product__imgs__wrap'>
 					<div className='product__imgs__list'>
-						<div
-							className='product__imgs__list__item'
-							onClick={() => setMainImg(product.images[0])}
-						>
-							<img
-								src={product.images[0]}
-								className={
-									mainImg === product.images[0] ? 'active' : ''
-								}
-								alt=''
-							/>
-						</div>
-						<div
-							className='product__imgs__list__item'
-							onClick={() => setMainImg(product.images[1])}
-						>
-							<img
-								src={product.images[1]}
-								className={
-									mainImg === product.images[1] ? 'active' : ''
-								}
-								alt=''
-							/>
-						</div>
+						{Array.isArray(product.images) &&
+							product.images.map((item) => (
+								<div
+									key={item.id}
+									className='product__imgs__list__item'
+									onClick={() => setMainImg(item.url)}
+								>
+									<img
+										src={item.url}
+										className={mainImg === item.url ? 'active' : ''}
+										alt=''
+									/>
+								</div>
+							))}
 					</div>
 					<div className='product__imgs__main'>
 						<img src={mainImg} alt='' />
 					</div>
 				</div>
-				<div className={`product__desc ${expandDesc ? 'active' : ''}`}>
+				<div className={`product__desc`}>
 					<h4 className='product__desc__title'>Chi tiết sản phẩm</h4>
 					<p
-						className='product__desc__content'
+						className={`product__desc__content  ${
+							expandDesc ? 'active' : ''
+						}`}
 						dangerouslySetInnerHTML={{ __html: product.description }}
 					></p>
 					<div className='product__desc__btn'>
@@ -133,23 +169,42 @@ const ProductView = ({ product }) => {
 					</div>
 				</div>
 			</div>
-			<div className='product__info'>
-				<h2 className='product__info__name'>Áo thun</h2>
+			<div className={`product__info ${isModal ? 'modal' : ''}`}>
+				<h2 className='product__info__name'>{product.name}</h2>
 
+				<div className='product__info__item'>
+					<div className='product__info__item__title'>Tình trạng: </div>
+					<div
+						className={`product__info__item__text ${
+							product.available ? '' : 'error'
+						}`}
+					>
+						{product.available ? 'Còn hàng' : 'Hết hàng'}
+					</div>
+				</div>
+				<div className='product__info__item'>
+					<div className='product__info__item__title'>Giá tiền</div>
+					<span className='product__info__item__text'>
+						{numberWithCommas(product.price)}
+						<span> đ</span>
+					</span>
+				</div>
 				<div className='product__info__item'>
 					<div className='product__info__item__title'>Màu sắc</div>
 					<div className='product__info__item__list'>
 						{Array.isArray(productColors) &&
 							productColors.map((item) => (
 								<div
-									key={item._id}
+									key={item.id}
 									className={`product__info__item__list__item ${
-										color === item._id ? 'active' : ''
+										color === item.id ? 'active' : ''
 									}`}
+									// If currently chosing this color, click this color
+									// again will cancel choosing it
 									onClick={() =>
-										color === item._id
+										color === item.id
 											? setColor('')
-											: setColor(item._id)
+											: setColor(item.id)
 									}
 								>
 									<div
@@ -166,34 +221,18 @@ const ProductView = ({ product }) => {
 						{Array.isArray(productSizes) &&
 							productSizes.map((item) => (
 								<div
-									key={item._id}
+									key={item.id}
 									className={`product__info__item__list__item ${
-										size === item._id ? 'active' : ''
+										size === item.id ? 'active' : ''
 									}`}
 									onClick={() =>
-										size === item._id
-											? setSize('')
-											: setSize(item._id)
+										size === item.id ? setSize('') : setSize(item.id)
 									}
 								>
 									<span className='size'>{item.name}</span>
 								</div>
 							))}
-						{/* {product.size.map((item, index) => (
-							<div
-								key={index}
-								className={`product__info__item__list__item ${
-									size === item ? 'active' : ''
-								}`}
-								onClick={() => setSize(item)}
-							>
-								<span className='size'>{item}</span>
-							</div>
-						))} */}
 					</div>
-				</div>
-				<div className='product__info__item'>
-					<span className='product__info__price'>189,000</span>
 				</div>
 				<div className='product__info__item'>
 					<div className='product__info__item__title'>Số lượng</div>
@@ -202,15 +241,27 @@ const ProductView = ({ product }) => {
 						handleChangeQuantity={handleChangeQuantity}
 					/>
 				</div>
+				<div className='product__info__item'>
+					<div className='product__info__item__title'>
+						Còn lại trong kho
+					</div>
+					<div className='product__info__item__text minor'>
+						{amount > 0 ? amount : '--'}
+						<span> {product.unit}</span>
+					</div>
+				</div>
 				<div className='product__info__btn'>
-					<Button onClick={goToCart}>Mua ngay</Button>
-					<Button onClick={addToCart}>Thêm vào giỏ hàng</Button>
+					<Button onClick={handleBuyProduct}>Mua ngay</Button>
+					<Button onClick={handleAddProduct}>Thêm vào giỏ hàng</Button>
 				</div>
 			</div>
-			<div className={`product__desc mobile ${expandDesc ? 'active' : ''}`}>
+
+			<div className={`product__desc mobile`}>
 				<h4 className='product__desc__title'>Chi tiết sản phẩm</h4>
 				<p
-					className='product__desc__content'
+					className={`product__desc__content  ${
+						expandDesc ? 'active' : ''
+					}`}
 					dangerouslySetInnerHTML={{ __html: product.description }}
 				></p>
 				<div className='product__desc__btn'>

@@ -7,7 +7,7 @@
 		@include flex(center, center);
 		width: 30px;
 		height: 30px;
-		font-size: 2rem;
+		font-size: 1.8rem;
 		border: 2px solid $txt-color-2;
 		cursor: pointer;
 
@@ -24,7 +24,7 @@
 		height: 30px;
 		border-top: 2px solid $txt-color-2;
 		border-bottom: 2px solid $txt-color-2;
-		font-size: 2rem;
+		font-size: 1.8rem;
 
 		&.sm {
 			width: 30px;
