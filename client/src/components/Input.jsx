@@ -10,6 +10,7 @@ const Input = ({
 	onBlur,
 	id,
 	key,
+	readOnly,
 }) => {
 	return (
 		<div key={key} className={`input ${className ? className : ''}`}>
@@ -18,12 +19,13 @@ const Input = ({
 				type={type}
 				value={value}
 				placeholder={placeholder}
-				className={`input__${type}`}
 				spellCheck={false}
 				onChange={onChange ? onChange : null}
 				onBlur={onBlur ? onBlur : null}
+				readOnly={readOnly}
+				className={`input__${type} ${readOnly ? 'readonly' : ''}`}
 			/>
-			{error && <span className='input__error color-red'>{error}</span>}
+			{error && <span className='input__err  or color-red'>{error}</span>}
 		</div>
 	)
 }

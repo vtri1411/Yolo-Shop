@@ -10,8 +10,6 @@ import { addProduct } from '../redux/cart/cart.actions'
 import { getProductById } from '../redux/product/product.actions'
 import numberWithCommas from '../utilities/numberWithCommas'
 
-const mapState = ({ color }) => ({ colors: color.colors })
-
 const ProductView = ({ product, isModal }) => {
 	const dispatch = useDispatch()
 
@@ -63,8 +61,6 @@ const ProductView = ({ product, isModal }) => {
 		return { productColors: tempColors, productSizes: tempSizes }
 	}, [product, size, color])
 
-	console.log({ product })
-
 	const handleChangeQuantity = (value) => {
 		if (color === '') {
 			toast.error('Vui lòng chọn màu sắc trước!')
@@ -76,10 +72,8 @@ const ProductView = ({ product, isModal }) => {
 		}
 
 		setQuantity(
-			quantity + value < amount
-				? quantity + value > 0
-					? quantity + value
-					: quantity
+			quantity + value < amount && quantity + value > 0
+				? quantity + value
 				: quantity
 		)
 	}

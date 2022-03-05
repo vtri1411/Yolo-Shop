@@ -13,21 +13,21 @@ const Footer = () => {
 					<div>
 						<h3 className='footer__title'>Tổng đài hỗ trợ</h3>
 						<div className='footer__content'>
-							<Link to=''>
+							<a href={`tel:0123456789`}>
 								<p>
 									Liên hệ đặt hàng - <strong>0123456789</strong>
 								</p>
-							</Link>
-							<Link to=''>
+							</a>
+							<a href={`tel:0123456789`}>
 								<p>
 									Thắc mắc đơn hàng - <strong>0123456789</strong>
 								</p>
-							</Link>
-							<Link to=''>
+							</a>
+							<a href={`tel:0123456789`}>
 								<p>
 									Góp ý, Khiếu nại - <strong>0123456789</strong>
 								</p>
-							</Link>
+							</a>
 						</div>
 					</div>
 					<div>

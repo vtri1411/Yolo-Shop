@@ -35,7 +35,6 @@ function App() {
 	useEffect(() => {
 		if (user) {
 			dispatch(loadUserCart())
-			console.log({ user })
 		} else {
 			dispatch(clearCart())
 		}

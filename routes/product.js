@@ -67,7 +67,7 @@ router.get('/', async (req, res) => {
 router.post('/filter', async (req, res) => {
 	try {
 		const { filter, sort, keyword } = req.body
-		const { color, size, brand, category } = filter ? filter : {}
+		const { color, size, brand, category, gender } = filter ? filter : {}
 
 		console.log({ filter, sort, keyword })
 
@@ -119,6 +119,17 @@ router.post('/filter', async (req, res) => {
 			})
 			where.push({
 				[Op.or]: categoryFilter,
+			})
+		}
+		if (Array.isArray(gender) && gender.length > 0) {
+			const genderFilter = []
+			gender.forEach((item) => {
+				genderFilter.push({
+					['$gender$']: item,
+				})
+			})
+			where.push({
+				[Op.or]: genderFilter,
 			})
 		}
 

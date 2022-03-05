@@ -126,7 +126,7 @@ const Register = () => {
 						<span className='auth__link__item__text'>
 							Đã có tài khoản?
 						</span>
-						<Link to='/register' className='auth__link__item__link'>
+						<Link to='/login' className='auth__link__item__link'>
 							Đăng nhập
 						</Link>
 					</div>

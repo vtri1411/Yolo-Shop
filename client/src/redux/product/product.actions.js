@@ -7,8 +7,6 @@ export const getAllProducts = () => async (dispatch) => {
 	try {
 		const { data } = await axios.get('/api/product')
 
-		console.log({ data })
-
 		if (data.status === 'FAIL') {
 			toast.error('Lấy danh sách sản phẩm thất bại!')
 			console.log(data.message)
@@ -27,7 +25,6 @@ export const getAllProducts = () => async (dispatch) => {
 export const filterProducts =
 	({ filter, keyword, sort } = {}) =>
 	async (dispatch) => {
-		console.log({ filter, keyword, sort })
 		try {
 			const { data } = await axios.post('/api/product/filter', {
 				filter,

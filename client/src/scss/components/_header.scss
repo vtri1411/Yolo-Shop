@@ -217,12 +217,11 @@
 			}
 
 			&__avatar {
-				max-width: 40px;
-
 				img {
 					display: block;
-					width: 100%;
-					height: auto;
+					width: 40px;
+					height: 40px;
+					border-radius: 50%;
 				}
 			}
 		}
@@ -234,7 +233,7 @@
 				display: block;
 				position: relative;
 
-				&__amount {
+				&__badge {
 					@include flex(center, center);
 					font-size: 1.6rem;
 					position: absolute;
@@ -242,10 +241,11 @@
 					bottom: 0;
 					transform: translate(50%, 50%);
 					border: 2px solid $main-color;
-					background-color: $main-bg;
+					background-color: $main-color;
 					border-radius: 50%;
 					width: 20px;
 					height: 20px;
+					color: #fff;
 				}
 			}
 

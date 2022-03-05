@@ -100,10 +100,21 @@ const Login = () => {
 					</div>
 					<div className='auth__link__item'>
 						<span className='auth__link__item__text'>
-							Đã có tài khoản?
+							Chưa có tài khoản?
 						</span>
 						<Link to='/register' className='auth__link__item__link'>
-							Đăng nhập
+							Đăng ký
+						</Link>
+					</div>
+				</div>
+
+				<div className='auth__link'>
+					<div className='auth__link__item'>
+						<Link
+							to='/verification-user'
+							className='auth__link__item__link'
+						>
+							Gửi lại mã xác nhận
 						</Link>
 					</div>
 				</div>

@@ -3,10 +3,6 @@ import userTypes from './user.types'
 const initialState = {
 	user: null,
 	isLoadingUser: true,
-	verification: {
-		email: '',
-		isSent: false,
-	},
 }
 
 const userReducer = (state = initialState, action) => {
@@ -15,39 +11,34 @@ const userReducer = (state = initialState, action) => {
 			return {
 				...state,
 				user: action.payload,
-				isLoading: false,
+				isLoadingUser: false,
 			}
 		case userTypes.LOAD_USER_ERROR:
 			return {
 				...state,
-				isLoading: false,
+				isLoadingUser: false,
 			}
 		case userTypes.LOGOUT_USER:
 			return {
 				...state,
 				user: null,
-				isLoading: false,
+				isLoadingUser: false,
 			}
 		case userTypes.LOGIN_USER_SUCCESS:
 			return {
 				...state,
 				user: action.payload,
-				isLoading: false,
+				isLoadingUser: false,
 			}
-		case userTypes.SET_VERIFICATION_EMAIL:
+		case userTypes.CHANGE_USER_INFO:
 			return {
 				...state,
-				verification: {
-					...state.verification,
-					email: action.payload,
-				},
-			}
-		case userTypes.RESEND_VERIFICATION_EMAIL_SUCCESS:
-			return {
-				...state,
-				verification: {
-					...state.verification,
-					isSent: true,
+				user: {
+					...state.user,
+					name: action.payload.name,
+					avatar: action.payload.avatar,
+					phone: action.payload.phone,
+					address: action.payload.address,
 				},
 			}
 		default:

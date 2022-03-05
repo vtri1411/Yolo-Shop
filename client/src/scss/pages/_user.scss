@@ -1,0 +1,148 @@
+.user {
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	padding-top: 50px;
+
+	@include sm {
+		flex-direction: column;
+	}
+
+	&__open-mobile {
+		margin: 0 0 30px 40px;
+		cursor: pointer;
+		display: none;
+
+		i {
+			font-size: 3rem;
+		}
+
+		@include sm {
+			display: block;
+		}
+	}
+
+	&__sidebar {
+		flex: 2;
+		height: 100%;
+		padding: 50px 10px;
+		box-shadow: $box-shadow;
+
+		@include sm {
+			position: fixed;
+			z-index: 100;
+			left: -100%;
+			top: 0;
+			bottom: 0;
+			background-color: $main-bg;
+			padding: 50px 40px;
+			transition: 0.3s ease left;
+		}
+
+		&.open {
+			left: 0;
+		}
+
+		&__hide-mobile {
+			display: none;
+			font-size: 3rem;
+			margin: 0px 0 50px 0;
+			color: $txt-color-2;
+			cursor: pointer;
+
+			@include sm {
+				@include flex(center, center);
+			}
+		}
+
+		&__widget {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			margin-bottom: 50px;
+		}
+
+		&__avatar {
+			width: 60px;
+			height: 60px;
+			margin-right: 10px;
+
+			img {
+				border-radius: 50%;
+			}
+		}
+
+		&__info {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			flex-shrink: 0;
+
+			&__name {
+				font-weight: 600;
+				margin-bottom: 8px;
+			}
+
+			&__edit {
+				font-weight: 300;
+				cursor: pointer;
+
+				i {
+					margin-right: 10px;
+				}
+			}
+		}
+
+		&__list {
+			&__item {
+				display: flex;
+				justify-content: center;
+				align-content: center;
+				width: 100%;
+				padding: 10px 14px;
+				background-color: #e7e7e7;
+				cursor: pointer;
+				transition: background-color ease 0.3s, color ease 0.3s;
+
+				&:hover,
+				&.active {
+					background: $main-color;
+					color: #fff;
+				}
+
+				& ~ & {
+					margin-top: 6px;
+				}
+
+				i {
+					font-size: 2rem;
+					margin-right: 6px;
+				}
+			}
+		}
+	}
+
+	&__content {
+		flex: 7;
+		margin-left: 40px;
+
+		@include sm {
+			margin-left: 0;
+		}
+
+		&__title {
+			padding-bottom: 10px;
+			border-bottom: 1px solid #ccc;
+
+			&__text {
+				font-weight: 600;
+				font-size: 1.8rem;
+			}
+
+			&__desc {
+				font-weight: 300;
+			}
+		}
+	}
+}

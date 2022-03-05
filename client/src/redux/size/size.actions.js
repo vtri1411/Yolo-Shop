@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export const getAllSize = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/size')
+		const { data } = await axios.get('/api/size')
 		if (data.status === 'FAIL') {
 			console.log(data.message)
 		} else {

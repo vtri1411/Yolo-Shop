@@ -1,9 +1,10 @@
 import React from 'react'
 
-import heroSlideData from '../assets/fake-data/hero-slider'
-
 import SwiperCore, { Autoplay } from 'swiper/'
 import { Swiper, SwiperSlide } from 'swiper/react'
+
+import heroSlideData from '../assets/slider/hero-slider'
+
 import Button from './Button'
 
 SwiperCore.use([Autoplay])
@@ -15,9 +16,9 @@ const HeroSlide = () => {
 				slidesPerView={1}
 				grabCursor={true}
 				loop={true}
-				// autoplay={{
-				// 	delay: 5000,
-				// }}
+				autoplay={{
+					delay: 5000,
+				}}
 			>
 				{heroSlideData.map((item, index) => (
 					<SwiperSlide key={index}>

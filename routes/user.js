@@ -1,7 +1,10 @@
 const router = require('express').Router()
 const bcryptjs = require('bcryptjs')
+const cloudinary = require('cloudinary').v2
 
 const constants = require('../config/constants')
+
+const { checkPassword } = require('../utilities/validator')
 
 const auth = require('../middlewares/auth')
 
@@ -24,8 +27,6 @@ const {
 } = require('../utilities/sendMail')
 const createAndHashSecretString = require('../utilities/createAndHashSecretString')
 const setAuthCooki = require('../utilities/setAuthCooki')
-
-// @Update file done
 
 // @route   GET api/user
 // @desc    Get user's account detail
@@ -99,8 +100,6 @@ router.post('/', async (req, res) => {
 
 		// Create secretString and secretString hashed
 		const { secretString, hashString } = createAndHashSecretString(user.id)
-
-		console.log({ secretString, hashString })
 
 		// Save verification user to database and Send email to user
 		await Promise.all([
@@ -372,6 +371,95 @@ router.post('/recovery/reset', async (req, res) => {
 			status: 'SUCCESS',
 			message: 'Recovery password success',
 		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   /api/user/changeInfo
+// @desc    Change user info
+// @access  Private
+router.post('/changeInfo', auth, async (req, res) => {
+	try {
+		const { phone, name, address, avatar } = req.body
+
+		const user = await User.findByPk(req.userId)
+
+		if (!user) {
+			return res.json({
+				status: 'FAIL',
+				message: 'Tài khoản không tồn tại!',
+			})
+		}
+
+		// Upload new image
+		const { secure_url } = await cloudinary.uploader.upload(avatar, {
+			upload_preset: 'Yolo_Shop',
+			unique_filename: true,
+		})
+
+		// Destroy old image
+		if (typeof user.avatar === 'string') {
+			await cloudinary.uploader.destroy(
+				constants.ROOT_IMG_ASSET +
+					user.avatar.substring(
+						user.avatar.lastIndexOf('/'),
+						user.avatar.lastIndexOf('.')
+					)
+			)
+		}
+
+		const rowUpdated = await User.update(
+			{ phone, name, address, avatar: secure_url },
+			{ where: { id: req.userId } }
+		)
+
+		if (rowUpdated === 0) {
+			return res.json({
+				status: 'FAIL',
+				message: 'Error when updating the user!',
+			})
+		}
+
+		res.json({ status: 'SUCCESS' })
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   /api/user/changePassword
+// @desc    Change user password
+// @access  Private
+router.post('/changePassword', auth, async (req, res) => {
+	try {
+		const { newPassword } = req.body
+
+		if (!checkPassword(newPassword)) {
+			return res.json({ status: 'FAIL', message: 'Invalid new password!' })
+		}
+
+		// Hash new password
+		const hashNewPassword = bcryptjs.hashSync(
+			newPassword,
+			constants.TIMES_GEN_SALT
+		)
+
+		// Model.update return array
+		const [rowUpdated] = await User.update(
+			{ password: hashNewPassword },
+			{ where: { id: req.userId } }
+		)
+
+		if (rowUpdated === 1) {
+			return res.json({ status: 'SUCCESS' })
+		} else {
+			return res.json({
+				status: 'FAIL',
+				message: `Row Updated = ${rowUpdated}`,
+			})
+		}
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)

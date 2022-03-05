@@ -1,9 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-
-import policy from '../assets/fake-data/policy'
-
 import Grid from '../components/Grid'
+
+import policy from '../assets/policy'
 
 const Policy = () => {
 	return (
@@ -37,7 +36,7 @@ const PolicyCard = (props) => {
 PolicyCard.propTypes = {
 	icon: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
-	desc: PropTypes.string.isRequired
+	desc: PropTypes.string.isRequired,
 }
 
 export default Policy

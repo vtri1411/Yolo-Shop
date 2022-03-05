@@ -20,6 +20,7 @@ const filterType = {
 	COLOR: 'COLOR',
 	SIZE: 'SIZE',
 	BRAND: 'BRAND',
+	GENDER: 'GENDER',
 }
 
 const mapState = ({ product, category, brand, size, color }) => ({
@@ -37,6 +38,11 @@ const selectOption = [
 	{ value: 'PRICE_DESC', display: 'Giá cao tới thấp' },
 ]
 
+const genderList = [
+	{ id: 'MALE', name: 'Nam' },
+	{ id: 'FEMALE', name: 'Nữ' },
+]
+
 const Catalog = () => {
 	const dispatch = useDispatch()
 
@@ -51,6 +57,7 @@ const Catalog = () => {
 		color: [],
 		size: [],
 		brand: [],
+		gender: [],
 	}
 	const [filter, setFilter] = useState(initialFilter)
 
@@ -68,6 +75,8 @@ const Catalog = () => {
 				return filter.color.some((item) => item === id)
 			case filterType.SIZE:
 				return filter.size.some((item) => item === id)
+			case filterType.GENDER:
+				return filter.gender.some((item) => item === id)
 			default:
 				throw new Error('Filter type not exist')
 		}
@@ -87,6 +96,9 @@ const Catalog = () => {
 					break
 				case filterType.BRAND:
 					setFilter({ ...filter, brand: [...filter.brand, value] })
+					break
+				case filterType.GENDER:
+					setFilter({ ...filter, gender: [...filter.gender, value] })
 					break
 				default:
 					throw new Error()
@@ -117,6 +129,12 @@ const Catalog = () => {
 						brand: filter.brand.filter((item) => item !== value),
 					})
 					break
+				case filterType.GENDER:
+					setFilter({
+						...filter,
+						gender: filter.gender.filter((item) => item !== value),
+					})
+					break
 				default:
 					throw new Error()
 			}
@@ -129,7 +147,6 @@ const Catalog = () => {
 
 	const handleFilter = (e) => {
 		e.preventDefault()
-
 		dispatch(filterProducts({ filter, keyword, sort }))
 	}
 
@@ -194,6 +211,14 @@ const Catalog = () => {
 						type={filterType.CATEGORY}
 						handleChangeFilter={handleChangeFilter}
 					/>
+
+					<FilterWidget
+						list={genderList}
+						title='Giới tính'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.GENDER}
+						handleChangeFilter={handleChangeFilter}
+					/>
 					<FilterWidget
 						list={colors}
 						title='Màu sắc'
@@ -242,7 +267,7 @@ const FilterWidget = ({
 			<div className='catalog__filter__widget__title'>
 				<h3>{title}</h3>
 			</div>
-			<div class='catalog__filter__widget__list'>
+			<div className='catalog__filter__widget__list'>
 				{list?.map((item) => (
 					<div
 						key={item.id}

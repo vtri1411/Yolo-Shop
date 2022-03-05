@@ -13,4 +13,12 @@ function checkIsEmail(email) {
 	return false
 }
 
-module.exports = { checkIsEmail, checkIsPhone }
+function checkPassword(password) {
+	console.log({ password })
+	if (password && password.length >= 6) {
+		return true
+	}
+	return false
+}
+
+module.exports = { checkIsEmail, checkIsPhone, checkPassword }

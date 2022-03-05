@@ -5,7 +5,7 @@ import toastUpdate from '../../config/toastUpdate'
 
 export const loadUser = () => async (dispatch) => {
 	try {
-		const { data } = await axios.get('/user')
+		const { data } = await axios.get('/api/user')
 		dispatch({
 			type: userTypes.LOAD_USER_SUCCESS,
 			payload: data.payload,
@@ -20,7 +20,7 @@ export const loadUser = () => async (dispatch) => {
 
 export const logOutUser = () => async (dispatch) => {
 	try {
-		await axios.get('/auth/logout')
+		await axios.get('/api/auth/logout')
 		dispatch({
 			type: userTypes.LOGOUT_USER,
 		})
@@ -38,7 +38,7 @@ export const loginUser =
 
 		try {
 			const { data } = await axios.post(
-				'/auth/login',
+				'/api/auth/login',
 				{
 					email,
 					password,
@@ -49,8 +49,6 @@ export const loginUser =
 					},
 				}
 			)
-
-			await new Promise((resolve, rej) => setTimeout(() => resolve(1), 5000))
 
 			if (data.status === 'SUCCESS') {
 				toast.update(toastId, {
@@ -72,11 +70,6 @@ export const loginUser =
 				})
 
 				if (data.code === 603) {
-					dispatch({
-						type: userTypes.SET_VERIFICATION_EMAIL,
-						payload: email,
-					})
-
 					history.push('/verification-user')
 				}
 			}
@@ -97,7 +90,7 @@ export const registerUser =
 
 		try {
 			const { data } = await axios.post(
-				'/user',
+				'/api/user',
 				{
 					email,
 					password,
@@ -114,11 +107,6 @@ export const registerUser =
 					render: 'Đăng ký thành công',
 					type: 'success',
 					...toastUpdate,
-				})
-
-				dispatch({
-					type: userTypes.SET_VERIFICATION_EMAIL,
-					payload: email,
 				})
 
 				history.push('/verification-user')
@@ -139,16 +127,11 @@ export const registerUser =
 		}
 	}
 
-export const setVerificationEmail = (email) => ({
-	type: userTypes.SET_VERIFICATION_EMAIL,
-	payload: email,
-})
-
 export const reSendVerificationEmail = (email) => async (dispatch) => {
 	const toastId = toast.loading('Đang gửi mail, vui lòng chờ . . .')
 
 	try {
-		const { data } = await axios.post('/user/verification/resend', {
+		const { data } = await axios.post('/api/user/verification/resend', {
 			email,
 		})
 
@@ -157,10 +140,6 @@ export const reSendVerificationEmail = (email) => async (dispatch) => {
 				render: 'Gửi mail thành công, vui lòng kiểm tra email của bạn!',
 				type: 'success',
 				...toastUpdate,
-			})
-
-			dispatch({
-				type: userTypes.RESEND_VERIFICATION_EMAIL_SUCCESS,
 			})
 		} else {
 			toast.update(toastId, {
@@ -174,10 +153,7 @@ export const reSendVerificationEmail = (email) => async (dispatch) => {
 		toast.update(toastId, {
 			render: 'Có lỗi xảy ra khi gửi mail!',
 			type: 'error',
-			isLoading: false,
-			hideProgressBar: false,
-			autoClose: 5000,
-			position: 'top-center',
+			...toastUpdate,
 		})
 	}
 }
@@ -190,7 +166,7 @@ export const requestResetPassword =
 		)
 
 		try {
-			const { data } = await axios.post('/user/recovery/request', {
+			const { data } = await axios.post('/api/user/recovery/request', {
 				email,
 				redirectUrl,
 			})
@@ -230,7 +206,7 @@ export const resetPassword =
 	async (dispatch) => {
 		const toastId = toast.loading('Đang đặt lại mật khẩu, vui lòng chờ . . .')
 		try {
-			const { data } = await axios.post('/user/recovery/reset', {
+			const { data } = await axios.post('/api/user/recovery/reset', {
 				userId,
 				secretString,
 				newPassword,
@@ -274,4 +250,45 @@ export const resetPassword =
 				...toastUpdate,
 			})
 		}
+	}
+
+export const changeInfo =
+	({ name, phone, avatar, address }) =>
+	async (dispatch) => {
+		try {
+			const { data } = await axios.post('/api/user/changeInfo', {
+				name,
+				phone,
+				avatar,
+				address,
+			})
+
+			if ((data.status = 'SUCCESS')) {
+				dispatch({
+					type: userTypes.CHANGE_USER_INFO,
+					payload: { name, phone, avatar, address },
+				})
+				return toast.success('Đổi thông tin thành công!')
+			}
+		} catch (error) {
+			console.log(error)
+		}
+		toast.error('Đổi thông tin thất bại!')
+	}
+
+export const changePassword =
+	({ newPassword }) =>
+	async (dispatch) => {
+		try {
+			console.log({ newPassword })
+			const { data } = await axios.post('/api/user/changePassword', {
+				newPassword,
+			})
+			console.log({ data })
+			if (data.status === 'SUCCESS')
+				return toast.success('Đổi mật khẩu thành công!')
+		} catch (error) {
+			console.log(error)
+		}
+		toast.error('Đổi mật khẩu thất bại!')
 	}

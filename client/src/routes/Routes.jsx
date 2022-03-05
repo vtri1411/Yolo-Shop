@@ -7,11 +7,13 @@ import Product from '../pages/ProductDetail'
 import Home from '../pages/Home'
 import NotFound from '../pages/NotFound'
 import OAuth from '../pages/Auth/OAuth'
-import ShowVerificationInfo from '../pages/Auth/ShowVerificationInfo'
+import ResendVerification from '../pages/Auth/ResendVerification'
 import ResetPassword from '../pages/Auth/ResetPassword'
 import Login from '../pages/Auth/Login'
 import Register from '../pages/Auth/Register'
 import Recovery from '../pages/Auth/Recovery'
+import User from '../pages/User/User'
+import PrivateRoute from '../components/PrivateRoute'
 
 const Routes = () => {
 	return (
@@ -23,7 +25,7 @@ const Routes = () => {
 			<Route
 				path='/verification-user'
 				exact
-				component={ShowVerificationInfo}
+				component={ResendVerification}
 			/>
 			<Route path='/oauth' exact component={OAuth} />
 			<Route path='/register' exact component={Register} />
@@ -40,6 +42,10 @@ const Routes = () => {
 
 			{/* Cart */}
 			<Route path='/cart' exact component={Cart} />
+
+			{/* User */}
+			{/* <Route path='/user/:slug' exact component={User} /> */}
+			<PrivateRoute path='/user/:slug' exact component={User} />
 
 			{/* 404 */}
 			<Route component={NotFound} />

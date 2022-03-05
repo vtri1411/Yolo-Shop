@@ -9,8 +9,6 @@ module.exports = function ({ res, userId, userRoles }) {
 		}
 	)
 
-	console.log(token)
-
 	res.cookie('jwt', token, {
 		maxAge: Number.parseInt(process.env.TOKEN_EXPIRED),
 		httpOnly: true,

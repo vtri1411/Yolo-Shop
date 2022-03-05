@@ -5,10 +5,6 @@
 	position: relative;
 	padding: 30px 20px 20px;
 
-	& > * ~ * {
-		margin-top: 15px;
-	}
-
 	&__title {
 		position: absolute;
 		top: 0;
@@ -25,6 +21,7 @@
 	&__form {
 		display: flex;
 		flex-direction: column;
+		margin-top: 15px;
 
 		&__group {
 			display: flex;
@@ -53,6 +50,8 @@
 		flex-wrap: wrap;
 
 		&__item {
+			margin-top: 15px;
+
 			&__text {
 				margin-right: 4px;
 			}
@@ -70,5 +69,9 @@
 		justify-content: center;
 		align-items: center;
 		animation: fadeIn 0.3s ease-in;
+	}
+
+	&__oauth {
+		margin-top: 15px;
 	}
 }

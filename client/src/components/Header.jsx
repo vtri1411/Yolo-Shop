@@ -123,7 +123,7 @@ const Header = (props) => {
 							<Link className='header__nav__cart__link' to='/cart'>
 								<i className='bx bx-shopping-bag'></i>
 								{Array.isArray(cart) && (
-									<div className='header__nav__cart__link__amount'>
+									<div className='header__nav__cart__link__badge'>
 										{cart.length}
 									</div>
 								)}
@@ -194,6 +194,16 @@ const Header = (props) => {
 							<div className='header__nav__auth__panel'>
 								{!isLoading && user ? (
 									<>
+										<Button
+											size='sm'
+											className='header__nav__auth__panel__btn'
+										>
+											<Link to='/user/profile'>
+												<p className='header__nav__auth__panel__btn__text'>
+													Tài khoản của tôi
+												</p>
+											</Link>
+										</Button>
 										<Button
 											size='sm'
 											className='header__nav__auth__panel__btn'

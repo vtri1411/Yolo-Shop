@@ -2,6 +2,7 @@ export const TYPE = {
 	EMAIL: 'EMAIL',
 	PASSWORD: 'PASSWORD',
 	REPASSWORD: 'REPASSWORD',
+	PHONE: 'PHONE',
 }
 
 const check = (value, checkType, password) => {
@@ -18,11 +19,16 @@ const check = (value, checkType, password) => {
 		case TYPE.REPASSWORD:
 			if (value === password) return ''
 			else return 'Mật khẩu nhập lại không đúng !'
+		case TYPE.PHONE:
+			console.log({ value })
+			if (/[0-9]+$/y.test(value) && value?.length === 10) return ''
+			else return 'Chỉ được phép nhập số !'
 	}
 }
 
 export default function (value, checkType, password) {
 	let error = ''
+   console.log({value})
 
 	if (Array.isArray(checkType) && checkType.length > 0) {
 		for (const item of checkType) {
