@@ -44,13 +44,18 @@ router.post('/addProduct', auth, async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: 'Invalid inventory id or quantity!',
+				code: 603,
 			})
 		}
 
 		const user = await User.findByPk(req.userId)
 
 		if (!user) {
-			return res.json({ status: 'FAIL', message: 'Invalid user!' })
+			return res.json({
+				status: 'FAIL',
+				message: 'Invalid user!',
+				code: 606,
+			})
 		}
 
 		// Check if product existe in cart
@@ -77,6 +82,7 @@ router.post('/addProduct', auth, async (req, res) => {
 				return res.json({
 					status: 'FAIL',
 					message: 'Số lượng sản phẩm trong kho không đủ!',
+					code: 610,
 				})
 			}
 
@@ -116,6 +122,7 @@ router.post('/addProduct', auth, async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: 'Số lượng sản phẩm trong kho không đủ!',
+				code: 610,
 			})
 		}
 
@@ -172,6 +179,7 @@ router.post('/changeQuantity', auth, async (req, res) => {
 				return res.json({
 					status: 'FAIL',
 					message: 'Số lượng sản phẩm trong kho không đủ!',
+					code: 610,
 				})
 			}
 		}

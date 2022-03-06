@@ -69,6 +69,8 @@
 			margin-right: 10px;
 
 			img {
+				width: 100%;
+				height: 100%;
 				border-radius: 50%;
 			}
 		}
@@ -142,6 +144,33 @@
 
 			&__desc {
 				font-weight: 300;
+			}
+		}
+
+		&__orderHistory {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		&__orderDetail {
+			&__form {
+				display: flex;
+				flex-direction: row;
+				margin-right: 40px;
+				flex-wrap: wrap;
+
+				&__group {
+					width: 400px;
+					max-width: 100%;
+					margin-right: 20px;
+					margin-top: 40px;
+				}
+
+				&__btn {
+					margin-top: 40px;
+				}
 			}
 		}
 	}

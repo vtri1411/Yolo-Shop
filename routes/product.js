@@ -9,185 +9,85 @@ const {
 	Size,
 	Color,
 	Op,
-	Sequelize,
+	QueryTypes,
+	sequelize,
 } = require('../models/index')
-const getOrderObject = require('../utilities/getOrderObject')
+const getOrderString = require('../utilities/getOrderString')
+const { getProductsQuery } = require('../utilities/query')
 
-// @route   GET api/product
-// @desc    Get products
-// @access  Public
-router.get('/', async (req, res) => {
-	try {
-		const products = await Product.findAll({
-			include: [
-				{
-					model: Brand,
-					required: true,
-				},
-				{
-					model: Category,
-					required: true,
-				},
-				{
-					model: Image,
-					required: true,
-					attributes: ['url'],
-				},
-				{
-					model: Inventory,
-					required: true,
-					include: [
-						{
-							model: Color,
-							required: true,
-						},
-						{
-							model: Size,
-							required: true,
-						},
-					],
-				},
-			],
-		})
-
-		res.json({
-			status: 'SUCCESS',
-			message: 'Lấy danh sách sản phẩm thành công!',
-			payload: products,
-		})
-	} catch (error) {
-		console.log(error)
-		res.sendStatus(500)
-	}
-})
-
-// @route   POST api/product/filter
+// @route   POST GET api/product
 // @desc    Filter and get products
 // @access  Public
 router.post('/filter', async (req, res) => {
 	try {
-		const { filter, sort, keyword } = req.body
+		const { filter, sort, keyword, limit, offset } = req.body
 		const { color, size, brand, category, gender } = filter ? filter : {}
 
-		console.log({ filter, sort, keyword })
-
-		const where = []
-		const order = {}
-
+		let where = []
+		if (Array.isArray(category) && category.length > 0) {
+			let categoryStr = ''
+			category.forEach((item, index) => {
+				if (index === 0) {
+					categoryStr += `categoryId = ${item} `
+				} else {
+					categoryStr += `or categoryId = ${item} `
+				}
+			})
+			where.push(`(${categoryStr})`)
+		}
 		if (Array.isArray(color) && color.length > 0) {
-			const colorFilter = []
-			color.forEach((item) => {
-				colorFilter.push({
-					['$inventories.color.id$']: item,
-				})
+			let colorStr = ''
+			color.forEach((item, index) => {
+				if (index === 0) {
+					colorStr += `colorId = ${item} `
+				} else {
+					colorStr += `or colorId = ${item} `
+				}
 			})
-
-			where.push({
-				[Op.or]: colorFilter,
-			})
+			where.push(`(${colorStr})`)
 		}
 		if (Array.isArray(size) && size.length > 0) {
-			const sizeFilter = []
-
-			size.forEach((item) => {
-				sizeFilter.push({
-					['$inventories.size.id$']: item,
-				})
+			let sizeStr = ''
+			size.forEach((item, index) => {
+				if (index === 0) {
+					sizeStr += `sizeId = ${item} `
+				} else {
+					sizeStr += `or sizeId = ${item} `
+				}
 			})
-			where.push({
-				[Op.or]: sizeFilter,
-			})
+			where.push(`(${sizeStr})`)
 		}
 		if (Array.isArray(brand) && brand.length > 0) {
-			const brandFilter = []
+			let brandStr = ''
+			brand.forEach((item, index) => {
+				if (index === 0) {
+					brandStr += `brandId = ${item} `
+				} else {
+					brandStr += `or brandId = ${item} `
+				}
+			})
+			where.push(`(${brandStr})`)
+		}
 
-			brand.forEach((item) => {
-				brandFilter.push({
-					['$brand.id$']: item,
-				})
-			})
-			where.push({
-				[Op.or]: brandFilter,
-			})
-		}
-		if (Array.isArray(category) && category.length > 0) {
-			const categoryFilter = []
-			category.forEach((item) => {
-				categoryFilter.push({
-					['$category.id$']: item,
-				})
-			})
-			where.push({
-				[Op.or]: categoryFilter,
-			})
-		}
-		if (Array.isArray(gender) && gender.length > 0) {
-			const genderFilter = []
-			gender.forEach((item) => {
-				genderFilter.push({
-					['$gender$']: item,
-				})
-			})
-			where.push({
-				[Op.or]: genderFilter,
-			})
+		if (where.length > 0) {
+			where = where.join(' and ')
+		} else {
+			where = ''
 		}
 
 		if (keyword) {
-			where.push(
-				Sequelize.literal(
-					`MATCH (product.name,product.description) AGAINST ("${keyword}" IN NATURAL LANGUAGE MODE)`
-				)
-			)
+			where += ` and MATCH(name, description) AGAINST("${keyword}" IN NATURAL LANGUAGE MODE)`
 		}
 
-		if (sort) {
-			order.order = getOrderObject(sort)
-		}
-
-		console.log({ where, order })
-
-		const products = await Product.findAll({
-			where: {
-				[Op.and]: where,
-			},
-			include: [
-				{
-					model: Brand,
-					required: true,
-					as: 'brand',
-				},
-				{
-					model: Category,
-					required: true,
-					as: 'category',
-				},
-				{
-					model: Image,
-					required: true,
-					as: 'images',
-				},
-				{
-					model: Inventory,
-					required: true,
-					as: 'inventories',
-					include: [
-						{
-							model: Color,
-							required: true,
-							as: 'color',
-						},
-						{
-							model: Size,
-							required: true,
-							as: 'size',
-						},
-					],
-				},
-			],
-			...order,
-		})
-
+		const products = await sequelize.query(
+			getProductsQuery({
+				where: where,
+				limit,
+				offset,
+				sort: getOrderString(sort),
+			}),
+			{ type: QueryTypes.SELECT }
+		)
 		res.json({
 			status: 'SUCCESS',
 			message: 'Lấy danh sách sản phẩm thành công!',

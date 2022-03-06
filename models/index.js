@@ -26,7 +26,7 @@ const sequelize =
 				process.env.LC_MYSQLPASSWORD,
 				{
 					host: process.env.LC_MYSQLHOST,
-					port: process.env.MYSQLPORT,
+					port: process.env.LC_MYSQLPORT,
 					dialect: 'mysql',
 					// Default sql port
 					port: 3306,

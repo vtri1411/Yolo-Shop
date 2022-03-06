@@ -28,6 +28,7 @@ const MainLayOut = () => {
 						<ToastContainer
 							theme='dark'
 							position='top-center'
+							hideProgressBar={true}
 						/>
 					</>
 				)}

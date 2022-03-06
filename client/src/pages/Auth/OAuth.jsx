@@ -18,7 +18,7 @@ const OAuth = () => {
 			const hash = locationHashParser(window.location.hash)
 			try {
 				const { data } = await axios.post(
-					'http://localhost:5000/api/auth/oauth/google',
+					'/api/auth/oauth/google',
 					{
 						access_token: hash.access_token,
 					},

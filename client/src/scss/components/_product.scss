@@ -152,6 +152,11 @@
 				}
 			}
 
+			&__desc {
+				margin-left: 10px;
+				text-transform: capitalize;
+			}
+
 			&__list {
 				@include flex();
 				& > * ~ * {

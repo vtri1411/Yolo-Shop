@@ -47,8 +47,8 @@ const ShowVerification = () => {
 	}
 
 	return (
-		<Helmet title='Xác nhận tài khoản'>
-			<AuthContainer title={'Xác nhận email'}>
+		<Helmet title='Xác nhận'>
+			<AuthContainer title={'Gửi lại mã xác nhận'}>
 				<AuthForm onSubmit={handleClickReSendEmail}>
 					<AuthFormGroup
 						type={'text'}

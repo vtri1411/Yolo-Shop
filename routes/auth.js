@@ -100,7 +100,7 @@ router.get('/logout', (req, res) => {
 router.post('/oauth/google', async (req, res) => {
 	const transaction = await sequelize.transaction()
 	try {
-		const { access_token } = req.body
+		const { access_token, redirectURL } = req.body
 
 		// Get user data from google api
 		const { data } = await axios.get(

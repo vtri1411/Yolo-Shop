@@ -25,7 +25,7 @@ export const changeQuantity =
 	({ quantity, inventoryId }) =>
 	async (dispatch) => {
 		try {
-			const { data } = await axios.post('/cart/changeQuantity', {
+			const { data } = await axios.post('/api/cart/changeQuantity', {
 				quantity,
 				inventoryId,
 			})
@@ -47,16 +47,25 @@ export const changeQuantity =
 export const addProduct =
 	({ inventoryId, quantity }) =>
 	async (dispatch) => {
+		console.log({ inventoryId, quantity })
 		try {
-			const { data } = await axios.post('/cart/addProduct', {
+			const { data } = await axios.post('/api/cart/addProduct', {
 				inventoryId,
 				quantity,
 			})
+
+			toast.dismiss()
+
 			if (data.status === 'SUCCESS') {
 				dispatch(loadUserCart())
-				toast.dismiss()
 				toast.success('Thêm sản phẩm vào giỏ hàng thành công!')
 				return
+			}
+
+			switch (data.code) {
+				case 610:
+					toast.dismiss()
+					return toast.error('Só lượng sản phẩm trong kho không đủ!')
 			}
 		} catch (error) {
 			console.log(error)
@@ -69,7 +78,7 @@ export const deleteProduct =
 	({ inventoryId }) =>
 	async (dispatch) => {
 		try {
-			const { data } = await axios.delete('/cart', {
+			const { data } = await axios.delete('/api/cart', {
 				data: {
 					inventoryId: inventoryId,
 				},

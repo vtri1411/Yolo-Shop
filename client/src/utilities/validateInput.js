@@ -28,7 +28,6 @@ const check = (value, checkType, password) => {
 
 export default function (value, checkType, password) {
 	let error = ''
-   console.log({value})
 
 	if (Array.isArray(checkType) && checkType.length > 0) {
 		for (const item of checkType) {

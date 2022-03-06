@@ -13,7 +13,6 @@ import { getAllCategory } from './redux/category/category.actions'
 import { getAllColor } from './redux/color/color.actions'
 import { getAllSize } from './redux/size/size.actions'
 import { getAllBrand } from './redux/brand/brand.actions'
-import { getAllProducts } from './redux/product/product.actions'
 import { loadUserCart, clearCart } from './redux/cart/cart.actions'
 
 const mapState = ({ user }) => ({ user: user.user })
@@ -29,7 +28,6 @@ function App() {
 		dispatch(getAllColor())
 		dispatch(getAllSize())
 		dispatch(getAllBrand())
-		dispatch(getAllProducts())
 	}, [])
 
 	useEffect(() => {

@@ -1,6 +1,6 @@
 export default {
 	isLoading: false,
-	hideProgressBar: false,
+	hideProgressBar: true,
 	position: 'top-center',
 	closeOnClick: true,
 	pauseOnFocusLoss: false,

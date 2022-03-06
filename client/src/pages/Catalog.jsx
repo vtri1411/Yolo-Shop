@@ -1,15 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import {
-	filterProducts,
-	getAllProducts,
-} from '../redux/product/product.actions'
+import sortTypes from '../config/sortTypes'
+
+import { getProducts } from '../redux/product/product.actions'
 
 import Helmet from '../components/Helmet'
 import CustomCheckbox from '../components/CustomCheckbox'
 import Button from '../components/Button'
-import InfinityList from '../components/InfinityList'
+import InfiniteList from '../components/InfiniteList'
 import Maginer from '../components/Marginer'
 import ProductList from '../components/ProductList'
 import Input from '../components/Input'
@@ -31,11 +30,11 @@ const mapState = ({ product, category, brand, size, color }) => ({
 	sizes: size.sizes,
 })
 
-const selectOption = [
-	{ value: 'NEWEST', display: 'Mới nhất' },
-	{ value: 'OLDEST', display: 'Cũ nhất' },
-	{ value: 'PRICE_ASC', display: 'Giá thấp tới cao' },
-	{ value: 'PRICE_DESC', display: 'Giá cao tới thấp' },
+const sortOptions = [
+	{ value: sortTypes.NEWEST, display: 'Mới nhất' },
+	{ value: sortTypes.OLDEST, display: 'Cũ nhất' },
+	{ value: sortTypes.PRICE_ASC, display: 'Giá thấp tới cao' },
+	{ value: sortTypes.PRICE_DESC, display: 'Giá cao tới thấp' },
 ]
 
 const genderList = [
@@ -145,11 +144,6 @@ const Catalog = () => {
 		setFilter(initialFilter)
 	}
 
-	const handleFilter = (e) => {
-		e.preventDefault()
-		dispatch(filterProducts({ filter, keyword, sort }))
-	}
-
 	useEffect(() => {
 		if (activeFilter) {
 			filterRef.current.classList.add('active')
@@ -157,6 +151,10 @@ const Catalog = () => {
 			filterRef.current.classList.remove('active')
 		}
 	}, [activeFilter])
+
+	// useEffect(() => {
+	// 	dispatch(getProducts({ limit: 10 }))
+	// }, [])
 
 	return (
 		<Helmet title='Danh mục'>
@@ -192,7 +190,7 @@ const Catalog = () => {
 
 						<Dropdown
 							defaultDisplay='Sắp xếp theo'
-							options={selectOption}
+							options={sortOptions}
 							onChange={setSort}
 						/>
 					</div>
@@ -235,10 +233,6 @@ const Catalog = () => {
 					/>
 
 					<div className='catalog__filter__widget'>
-						<Button onClick={handleFilter}>Xác nhận</Button>
-					</div>
-
-					<div className='catalog__filter__widget'>
 						<Button onClick={handleResetFilter}>Xóa bộ lọc</Button>
 					</div>
 				</div>
@@ -246,8 +240,7 @@ const Catalog = () => {
 					<Button onClick={() => setActiveFilter(true)}>Bộ lọc</Button>
 				</div>
 				<div className='catalog__product'>
-					<InfinityList products={products} />
-					{/* <ProductList /> */}
+					<InfiniteList filter={filter} sort={sort} keyword={keyword} />
 				</div>
 			</div>
 			<Maginer />

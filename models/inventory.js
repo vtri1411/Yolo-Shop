@@ -3,9 +3,11 @@ module.exports = function (sequelize, DataTypes) {
 		amount: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
+			validate: {
+				min: 0,
+			},
 		},
 	})
 
 	return Inventory
 }
-

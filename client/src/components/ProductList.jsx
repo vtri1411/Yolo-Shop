@@ -1,11 +1,11 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
 import Section, { SectionBody, SectionTitle } from './Section'
 import ProductCard from './ProductCard'
 import Grid from './Grid'
 
 const ProductList = ({ title, products }) => {
+	console.log({ products })
 	return (
 		<Section>
 			{title && <SectionTitle>{title}</SectionTitle>}

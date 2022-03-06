@@ -27,7 +27,6 @@ const ResetPassword = () => {
 
 	const [password, setPassword] = useState({ value: '', error: '' })
 	const [rePassword, setRePassword] = useState({ value: '', error: '' })
-	const [isLoading, setIsLoading] = useState(false)
 
 	const validatePassword = useCallback(() => {
 		const error = validateInput(password.value, TYPE.PASSWORD)
@@ -70,6 +69,10 @@ const ResetPassword = () => {
 			validateRePassword()
 		}
 	}, [password.error, rePassword.value, password.value])
+
+	useEffect(() => {
+		if (user) history.push('/')
+	}, [user])
 
 	return (
 		<Helmet title='Đặt lại mật khẩu'>

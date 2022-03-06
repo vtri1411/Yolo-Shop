@@ -12,7 +12,8 @@ const app = express()
 app.use(
 	cors({
 		// For reactjs
-		origin: 'http://localhost:3000',
+		origin:
+			process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000',
 		credentials: true,
 	})
 )
@@ -38,10 +39,9 @@ const PORT = process.env.PORT || 5000
 // HOSTING
 if (process.env.NODE_ENV === 'production') {
 	app.use(express.static(path.join(__dirname, 'client', 'build')))
-	app.get('/', (req, res) => {
-		res.sendFile(path.join(__dirname, 'client', 'build'))
+	app.get('*', (req, res) => {
+		res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
 	})
-	console.log('get ok')
 }
 
 app.listen(PORT, () => {

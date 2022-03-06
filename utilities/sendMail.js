@@ -62,7 +62,7 @@ const sendRecoveryMail = async (userId, email, secretString, redirectUrl) => {
 
 const sendVerificationMail = async (userId, email, secretString) => {
 	// Send email to the user
-	const link = `${constants.ROOT_SERVER_URL}/api/user/verification/${userId}/${secretString}`
+	const link = `http://${process.env.RAILWAY_STATIC_URL}/api/user/verification/${userId}/${secretString}`
 
 	try {
 		await sendMail({

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Maginer = ({ direction, margin }) => {
+const Marginer = ({ direction, margin }) => {
 	const style = {}
 	let formatedMargin = 0
 
@@ -23,4 +23,4 @@ const Maginer = ({ direction, margin }) => {
 	return <div style={style}></div>
 }
 
-export default Maginer
+export default Marginer

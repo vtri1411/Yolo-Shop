@@ -9,12 +9,14 @@ import Maginer from '../components/Marginer'
 import ProductView from '../components/ProductView'
 import ProductList from '../components/ProductList'
 
-const mapState = ({ product }) => ({ product: product.productDetail })
+const mapState = ({ product }) => ({
+	productDetail: product.productDetail,
+})
 
 const ProductDetail = () => {
 	const dispatch = useDispatch()
 
-	const { product } = useSelector(mapState)
+	const { productDetail } = useSelector(mapState)
 
 	const { id } = useParams()
 
@@ -26,7 +28,7 @@ const ProductDetail = () => {
 
 	return (
 		<Helmet title='Sản phẩm'>
-			{product && <ProductView product={product} />}
+			{productDetail && <ProductView product={productDetail} />}
 			<Maginer />
 			{/* <ProductList
 				items={productData.getProducts(4)}

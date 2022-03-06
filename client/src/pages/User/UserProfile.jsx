@@ -23,16 +23,15 @@ const UserProfile = () => {
 
 	const inputFileRef = useRef(null)
 
-	const [newName, setNewName] = useState(name)
-	const [newPhone, setNewPhone] = useState(phone)
-	const [newAddress, setNewAddress] = useState(address)
-	const [newAvatar, setNewAvatar] = useState(avatar)
+	const [newName, setNewName] = useState(name ? name : '')
+	const [newPhone, setNewPhone] = useState(phone ? phone : '')
+	const [newAddress, setNewAddress] = useState(address ? address : '')
+	const [newAvatar, setNewAvatar] = useState(avatar ? avatar : '')
 
 	const handleUploadAvt = (event) => {
 		const fileReader = new FileReader()
 		fileReader.readAsDataURL(event.target.files[0])
 		fileReader.onload = (e) => {
-			console.log(e.target.result)
 			setNewAvatar(e.target.result)
 		}
 		fileReader.onerror = (error) => {
@@ -48,7 +47,9 @@ const UserProfile = () => {
 
 	const handleEditInfo = (e) => {
 		e.preventDefault()
-		if (validateInput(newPhone, TYPE.PHONE)) {
+		// If user don't type phone, so ignore it
+		// If user type phone, so validate it
+		if (newPhone && validateInput(newPhone, TYPE.PHONE)) {
 			return toast.error('Vui lòng nhập số điện thoại hợp lệ!')
 		}
 		dispatch(
@@ -70,7 +71,10 @@ const UserProfile = () => {
 				</div>
 			</div>
 			<div className='user__content__profile'>
-				<UserForm onSubmit={handleEditInfo} className='user__content__profile__form' >
+				<UserForm
+					onSubmit={handleEditInfo}
+					className='user__content__profile__form'
+				>
 					<UserFormGroup
 						label={'Email:'}
 						readOnly
@@ -90,7 +94,7 @@ const UserProfile = () => {
 						type='text'
 					/>
 					<UserFormGroup
-						label='Address'
+						label='Address:'
 						value={newAddress}
 						onChange={(e) => setNewAddress(e.target.value)}
 						type='text'

@@ -1,17 +1,23 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import Button from '../components/Button'
 
 import CartItem from '../components/CartItem'
 import Helmet from '../components/Helmet'
+import { orderProducts } from '../redux/order/order.actions'
 import numberWithCommas from '../utilities/numberWithCommas'
 
 const mapState = ({ cart }) => ({ cart: cart.cart })
-
 const Cart = () => {
+	const dispatch = useDispatch()
+
 	const { cart } = useSelector(mapState)
+
+	const handleOrder = () => {
+		dispatch(orderProducts())
+	}
 
 	return (
 		<Helmet title='Giỏ hàng'>
@@ -33,12 +39,18 @@ const Cart = () => {
 												0
 											)
 									  )
-									: 0}
+									: 0}{' '}
+								đ
 							</span>
 						</div>
 					</div>
 					<div className='cart__info__btn'>
-						<Button className='cart__info__btn__item'>Đặt hàng</Button>
+						<Button
+							className='cart__info__btn__item'
+							onClick={handleOrder}
+						>
+							Đặt hàng
+						</Button>
 						<Link to='/'>
 							<Button className='cart__info__btn__item'>
 								Tiếp tục mua hàng

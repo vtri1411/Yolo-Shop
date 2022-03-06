@@ -18,8 +18,8 @@ const ProductCard = ({ name, images, price, id }) => {
 		<div className='product-card'>
 			<Link to={`/product/${id}`}>
 				<div className='product-card__img'>
-					<img src={images?.[0].url} alt='' />
-					<img src={images?.[1].url} alt='' />
+					<img src={images?.[0]} alt='' />
+					{images?.[1] && <img src={images?.[1]} alt='' />}
 				</div>
 				<div className='product-card__info'>
 					<div className='product-card__info__name'>{name}</div>

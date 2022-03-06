@@ -18,13 +18,13 @@ export const loadUser = () => async (dispatch) => {
 	}
 }
 
-export const logOutUser = () => async (dispatch) => {
+export const logOutUser = (history) => async (dispatch) => {
 	try {
 		await axios.get('/api/auth/logout')
 		dispatch({
 			type: userTypes.LOGOUT_USER,
 		})
-		toast('Đăng xuất thành công!', { position: 'top-center' })
+		history.push('/login')
 	} catch (error) {
 		console.log(error)
 		toast.error('Đăng xuất thất bại!')
@@ -109,18 +109,19 @@ export const registerUser =
 					...toastUpdate,
 				})
 
-				history.push('/verification-user')
-			} else {
-				toast.update(toastId, {
-					render: data.message,
-					type: 'error',
-					...toastUpdate,
-				})
+				return history.push('/verification-user')
+			}
+
+			switch (data.error) {
+				case 606:
+					toast.error('Email đã được sử dụng!')
+				default:
+					return
 			}
 		} catch (error) {
 			console.log(error)
 			toast.update(toastId, {
-				render: 'Server đang gặp lỗi xin vui lòng thử lại sau !',
+				render: 'Đăng ký không thành công!',
 				type: 'error',
 				...toastUpdate,
 			})
@@ -159,7 +160,7 @@ export const reSendVerificationEmail = (email) => async (dispatch) => {
 }
 
 export const requestResetPassword =
-	({ email, redirectUrl }) =>
+	({ email }) =>
 	async (dispatch) => {
 		const toastId = toast.loading(
 			'Đang xử lý đặt lại mật khẩu, vui lòng chờ . . .'
@@ -168,7 +169,6 @@ export const requestResetPassword =
 		try {
 			const { data } = await axios.post('/api/user/recovery/request', {
 				email,
-				redirectUrl,
 			})
 
 			if (data.status === 'SUCCESS') {
@@ -224,18 +224,12 @@ export const resetPassword =
 					position: 'top-center',
 				})
 
-				dispatch({
-					type: userTypes.LOGIN_USER_SUCCESS,
-					payload: data.payload,
-				})
+				dispatch(loadUser())
 			} else {
 				toast.update(toastId, {
 					render: data.message,
 					type: 'error',
-					isLoading: false,
-					hideProgressBar: false,
-					autoClose: 5000,
-					position: 'top-center',
+					...toastUpdate,
 				})
 
 				if (data.code === '004') {

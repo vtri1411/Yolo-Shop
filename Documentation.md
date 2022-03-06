@@ -1,13 +1,24 @@
-## Error code
+## Error code (Note: Code is number type)
 
-# Code is number type
+500: Server error
 
-0. 500: Server error
-1. 601: Error email
-2. 602: Error password
-3. 603: Email unverified
-4. 604: Expired time
-5. 605: Invalid secret string
+601: Invalid email
+602: Invalid password
+603: Invalid quantity
+604: Email already exist
+605: Invalid secret string
+606: Invalid user id
+607: Expire time
+608: Email unverified
+609: Email verified
+
+610: Not enough amount
+611: Empty cart
+612: Invalid cart
+
+# Database error
+
+701: No row affected
 
 ## Roles
 

@@ -6,6 +6,7 @@ import colorReducer from './color/color.reducer'
 import sizeReducer from './size/size.reducer'
 import categoryReducer from './category/category.reducer'
 import cartReducer from './cart/cart.reducer'
+import orderReducer from './order/order.reducer'
 
 const reducer = combineReducers({
 	user: userReducer,
@@ -15,6 +16,7 @@ const reducer = combineReducers({
 	size: sizeReducer,
 	category: categoryReducer,
 	cart: cartReducer,
+	order: orderReducer,
 })
 
 export default reducer

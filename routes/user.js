@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: 'Tài khoản đã tồn tại!',
-				user,
+				code: 606,
 			})
 		}
 
@@ -98,6 +98,8 @@ router.post('/', async (req, res) => {
 			}
 		)
 
+		console.log('go after create user')
+
 		// Create secretString and secretString hashed
 		const { secretString, hashString } = createAndHashSecretString(user.id)
 
@@ -106,9 +108,10 @@ router.post('/', async (req, res) => {
 			UserVerification.create(
 				{
 					userId: user.id,
-					expiredAt:
+					expiredAt: new Date(
 						Date.now() +
-						Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
+							Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME)
+					),
 					secret: hashString,
 				},
 				{ transaction }
@@ -121,6 +124,8 @@ router.post('/', async (req, res) => {
 				{ transaction }
 			),
 		])
+
+		console.log('go after create userverification')
 
 		await sendVerificationMail(user.id, email, secretString)
 		await transaction.commit()
@@ -154,11 +159,18 @@ router.post('/verification/resend', async (req, res) => {
 				message: 'Email không tồn tại trong hệ thống!',
 			})
 		}
+		if (user.verified) {
+			return res.json({
+				status: 'FAIL',
+				code: 609,
+				message: 'Email đã được xác minh!',
+			})
+		}
 
 		// Delete all verified record of this user
 		await UserVerification.destroy({ where: { userId: user.id } })
 
-		// Create secret string and hashe it
+		// Create secret string and hash it
 		const { hashString, secretString } = createAndHashSecretString(user.id)
 
 		// Save secret string hashed to database, send email to user
@@ -216,7 +228,11 @@ router.get('/verification/:id/:secret', async (req, res) => {
 
 		// Check if verification is expired
 		if (Date.now() > userVerification.expiredAt) {
-			return res.json({ status: 'FAIL', message: 'Xác nhận đã hết hạn!' })
+			return res.json({
+				status: 'FAIL',
+				message: 'Xác nhận đã hết hạn!',
+				code: 606,
+			})
 		}
 
 		// Compare user's input secret with verification secret from database
@@ -234,7 +250,7 @@ router.get('/verification/:id/:secret', async (req, res) => {
 				userRoles: user.userRoles.map((item) => item.role),
 			})
 
-			return res.redirect(constants.ROOT_UI_URL)
+			return res.redirect('/')
 		} else {
 			// If the comparasion is not corrects
 			return res.json({
@@ -254,14 +270,20 @@ router.get('/verification/:id/:secret', async (req, res) => {
 // @access  Public
 router.post('/recovery/request', async (req, res) => {
 	try {
-		const { email, redirectUrl } = req.body
+		const { email } = req.body
 		const user = await User.findOne({ where: { email: email } })
+
+		const redirectUrl =
+			process.env.NODE_ENV === 'production'
+				? `http://${process.env.RAILWAY_STATIC_URL}/recovery/reset`
+				: 'http://localhost:3000/recovery/reset'
 
 		// Check user exist
 		if (!user || !user.verified) {
 			return res.json({
 				status: 'FAIL',
 				message: 'Email không tồn tại hoặc chưa được xác minh!',
+				code: 601,
 			})
 		}
 
@@ -307,6 +329,7 @@ router.post('/recovery/reset', async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: 'Tài khoản không hợp lệ!',
+				code: 606,
 			})
 		}
 
@@ -317,7 +340,7 @@ router.post('/recovery/reset', async (req, res) => {
 				status: 'FAIL',
 				message:
 					'Link khôi phục mật khẩu của bạn đã hết hạn, vui lòng tạo lại !',
-				code: 604,
+				code: 607,
 			})
 		}
 
@@ -351,7 +374,7 @@ router.post('/recovery/reset', async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: 'Server error!',
-				code: 500,
+				code: 701,
 			})
 		}
 
@@ -383,6 +406,7 @@ router.post('/recovery/reset', async (req, res) => {
 router.post('/changeInfo', auth, async (req, res) => {
 	try {
 		const { phone, name, address, avatar } = req.body
+		let avtUrl = ''
 
 		const user = await User.findByPk(req.userId)
 
@@ -390,28 +414,33 @@ router.post('/changeInfo', auth, async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: 'Tài khoản không tồn tại!',
+				code: 606,
 			})
 		}
 
-		// Upload new image
-		const { secure_url } = await cloudinary.uploader.upload(avatar, {
-			upload_preset: 'Yolo_Shop',
-			unique_filename: true,
-		})
+		if (avatar) {
+			// Upload new image
+			const { secure_url } = await cloudinary.uploader.upload(avatar, {
+				upload_preset: 'Yolo_Shop',
+				unique_filename: true,
+			})
 
-		// Destroy old image
-		if (typeof user.avatar === 'string') {
-			await cloudinary.uploader.destroy(
-				constants.ROOT_IMG_ASSET +
-					user.avatar.substring(
-						user.avatar.lastIndexOf('/'),
-						user.avatar.lastIndexOf('.')
-					)
-			)
+			avtUrl = secure_url
+
+			// Destroy old image
+			if (typeof user.avatar === 'string') {
+				await cloudinary.uploader.destroy(
+					constants.ROOT_IMG_ASSET +
+						user.avatar.substring(
+							user.avatar.lastIndexOf('/'),
+							user.avatar.lastIndexOf('.')
+						)
+				)
+			}
 		}
 
 		const rowUpdated = await User.update(
-			{ phone, name, address, avatar: secure_url },
+			{ phone, name, address, avatar: avtUrl },
 			{ where: { id: req.userId } }
 		)
 
@@ -419,6 +448,7 @@ router.post('/changeInfo', auth, async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: 'Error when updating the user!',
+				code: 701,
 			})
 		}
 
@@ -458,6 +488,7 @@ router.post('/changePassword', auth, async (req, res) => {
 			return res.json({
 				status: 'FAIL',
 				message: `Row Updated = ${rowUpdated}`,
+				code: 701,
 			})
 		}
 	} catch (error) {

@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+
+import sortTypes from '../config/sortTypes'
+
+import { getProducts } from '../redux/product/product.actions'
 
 import Helmet from '../components/Helmet'
 import HeroSlide from '../components/HeroSlide'
@@ -11,7 +15,13 @@ import Banner from '../components/Banner'
 const mapState = ({ product }) => ({ products: product.products })
 
 const Home = () => {
+	const dispatch = useDispatch()
+
 	const { products } = useSelector(mapState)
+
+	useEffect(() => {
+		dispatch(getProducts({ limit: 7, sort: sortTypes.NEWEST }))
+	}, [])
 
 	return (
 		<Helmet title='Home'>

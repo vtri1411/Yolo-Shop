@@ -1,18 +1,22 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useHistory, useLocation } from 'react-router-dom'
+
 import { useMediaQuery } from 'react-responsive'
 import ReactLoading from 'react-loading'
+import { toast } from 'react-toastify'
+
+import screenWidth from '../screenWidth'
+
+import { logOutUser } from '../redux/user/user.actions'
+import { changeQuantity } from '../redux/cart/cart.actions'
 
 import logo from '../assets/images/Logo-2.png'
 import emptyCartImg from '../assets/images/empty-cart.png'
 import blankAvt from '../assets/images/blank_avt.png'
-import screenWidth from '../screenWidth'
 
 import Button from './Button'
 import Quantity from './Quantity'
-import { logOutUser } from '../redux/user/user.actions'
-import { changeQuantity } from '../redux/cart/cart.actions'
 
 const nav = [
 	{
@@ -42,6 +46,8 @@ const mapState = ({ user, cart }) => ({
 const Header = (props) => {
 	const dispatch = useDispatch()
 
+	const history = useHistory()
+
 	const headerRef = useRef(null)
 
 	const [activeNav, setActiveNav] = useState(false)
@@ -61,7 +67,7 @@ const Header = (props) => {
 	}, [activeAuthPanel, isSmallScreen])
 
 	const handleClickLogOut = useCallback(() => {
-		dispatch(logOutUser())
+		dispatch(logOutUser(history))
 	}, [])
 
 	useEffect(() => {
@@ -158,10 +164,28 @@ const Header = (props) => {
 													<div className='header__nav__cart__panel__product__quantity'>
 														<Quantity
 															handleChangeQuantity={(value) => {
+																if (
+																	item.quantity + value < 1 &&
+																	value < 0
+																) {
+																	toast.dismiss()
+																	return toast.error(
+																		'Số lượng sản phẩm không được nhỏ hơn 1!'
+																	)
+																}
+																if (
+																	item.quantity + value >
+																		item.amount &&
+																	value > 0
+																) {
+																	toast.dismiss()
+																	return toast.error(
+																		'Số lượng sản phẩm vượt quá số lượng trong kho!'
+																	)
+																}
 																dispatch(
 																	changeQuantity({
-																		quantity:
-																			item.quantity + value,
+																		quantity: value,
 																		inventoryId:
 																			item.inventoryId,
 																	})

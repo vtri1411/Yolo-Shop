@@ -1,4 +1,4 @@
-import React, {  useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 
@@ -39,7 +39,6 @@ const Recovery = () => {
 		dispatch(
 			requestResetPassword({
 				email: email.value,
-				redirectUrl: 'http://localhost:3000/recovery/reset',
 			})
 		)
 	}

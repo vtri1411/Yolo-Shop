@@ -1,7 +1,7 @@
 import productTypes from './product.types'
 
 const initialState = {
-	products: null, // [{}]
+	products: [], // [{}]
 	productDetail: null, // {}
 
 	isLoadingProductModal: false,
@@ -15,6 +15,11 @@ const productReducer = (state = initialState, action) => {
 			return {
 				...state,
 				products: action.payload,
+			}
+		case productTypes.APPEND_PRODUCTS:
+			return {
+				...state,
+				products: [...state.products, ...action.payload],
 			}
 		case productTypes.SET_PRODUCT:
 			return {

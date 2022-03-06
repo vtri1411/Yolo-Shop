@@ -8,10 +8,11 @@ const UserFormGroup = ({
 	readOnly,
 	label,
 	error,
+	className,
 	onBlur,
 }) => {
 	return (
-		<div className='user__form__group'>
+		<div className={`user__form__group ${className}`}>
 			<label className='user__form__label'>{label}</label>
 			<Input
 				error={error}

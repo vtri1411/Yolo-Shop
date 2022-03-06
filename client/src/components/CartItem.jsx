@@ -24,12 +24,12 @@ const CartItem = ({ product }) => {
 			</div>
 			<div className='cart__item__info'>
 				<div className='cart__item__info__name'>
-					<Link to={`/product/${1}`}>
+					<Link to={`/product/${product.productId}`}>
 						{`${product.name} - Màu ${product.color} - Size ${product.size}`}
 					</Link>
 				</div>
 				<div className='cart__item__info__price'>
-					{numberWithCommas(product.price)}
+					{numberWithCommas(product.price)} đ
 				</div>
 				<div className='cart__item__info__quantity'>
 					<Quantity
@@ -52,7 +52,7 @@ const CartItem = ({ product }) => {
 							}
 							dispatch(
 								changeQuantity({
-									quantity: product.quantity + value,
+									quantity: value,
 									inventoryId: product.inventoryId,
 								})
 							)

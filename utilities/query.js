@@ -1,14 +1,26 @@
 const getUserCartQuery = (id) => `
-SELECT PRODUCTS.NAME AS 'name', (INVENTORIES.AMOUNT >= CARTS.QUANTITY)  AS 'isValid',
-	COLORS.NAME AS 'color', COLORS.HEX AS 'hex', SIZES.NAME AS 'size', CARTS.QUANTITY AS 'quantity',
-    INVENTORIES.AMOUNT AS 'amount', json_arrayagg( IMAGES.URL) as 'images',
-    INVENTORIES.ID AS 'inventoryId', PRODUCTS.ID AS 'productId', PRODUCTS.PRICE AS 'price'
-FROM USERS, CARTS, INVENTORIES, PRODUCTS, SIZES, COLORS, IMAGES
-WHERE USERS.id = ${id} AND USERS.ID = CARTS.userId AND CARTS.INVENTORYID = INVENTORIES.ID
-	AND PRODUCTS.ID = INVENTORIES.PRODUCTID AND SIZES.ID = INVENTORIES.SIZEID 
-    AND COLORS.ID = INVENTORIES.COLORID AND IMAGES.PRODUCTID = PRODUCTS.ID
-GROUP BY PRODUCTS.NAME, COLORS.NAME, COLORS.HEX, SIZES.NAME, CARTS.QUANTITY, INVENTORIES.AMOUNT,
-	INVENTORIES.ID
+SELECT products.NAME AS 'name', (inventories.AMOUNT >= carts.QUANTITY)  AS 'isValid',
+	colors.NAME AS 'color', colors.HEX AS 'hex', sizes.NAME AS 'size', carts.QUANTITY AS 'quantity',
+    inventories.AMOUNT AS 'amount', json_arrayagg( images.URL) as 'images',
+    inventories.ID AS 'inventoryId', products.ID AS 'productId', products.PRICE AS 'price'
+FROM users, carts, inventories, products, sizes, colors, images
+WHERE users.id = ${id} AND users.ID = carts.userId AND carts.INVENTORYID = inventories.ID
+	AND products.ID = inventories.PRODUCTID AND sizes.ID = inventories.SIZEID 
+    AND colors.ID = inventories.colorID AND images.PRODUCTID = products.ID
+GROUP BY products.NAME, colors.NAME, colors.HEX, sizes.NAME, carts.QUANTITY, inventories.AMOUNT,
+	inventories.ID
 `
 
-module.exports = { getUserCartQuery }
+const getProductsQuery = ({ where, limit, offset, sort }) => `
+select products.*, (
+	select  json_arrayagg(url) from images where images.productId = products.id
+) as 'images'  from products
+ inner join inventories on products.id = inventories.productId
+ ${where ? ` where ${where}` : ''}
+ group by products.id 
+ ${sort ? ` order by ${sort}` : ''}
+ ${limit ? ` limit ${limit}` : ''}
+ ${offset ? ` offset ${offset}` : ''}
+`
+
+module.exports = { getUserCartQuery, getProductsQuery }
