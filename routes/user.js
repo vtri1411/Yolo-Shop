@@ -279,10 +279,10 @@ router.post('/recovery/request', async (req, res) => {
 				: 'http://localhost:3000/recovery/reset'
 
 		// Check user exist
-		if (!user || !user.verified) {
+		if (!user) {
 			return res.json({
 				status: 'FAIL',
-				message: 'Email không tồn tại hoặc chưa được xác minh!',
+				message: 'Email không tồn tại trong hệ thống !',
 				code: 601,
 			})
 		}
@@ -359,10 +359,10 @@ router.post('/recovery/reset', async (req, res) => {
 			constants.TIMES_GEN_SALT
 		)
 
-		// Update password and delete all recovery records
+		// Update password, set verified to true and delete all recovery records
 		const [rowEffected] = await Promise.all([
 			User.update(
-				{ password: hashPassword },
+				{ password: hashPassword, verified: true },
 				{
 					where: { id: userId },
 				}

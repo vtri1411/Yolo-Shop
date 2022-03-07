@@ -108,17 +108,6 @@ const Login = () => {
 					</div>
 				</div>
 
-				<div className='auth__link'>
-					<div className='auth__link__item'>
-						<Link
-							to='/verification-user'
-							className='auth__link__item__link'
-						>
-							Gửi lại mã xác nhận
-						</Link>
-					</div>
-				</div>
-
 				<div className='auth__oauth'>
 					<a className='auth__oauth__item' href={googleOauthUrl}>
 						<img src={googleLoginImg} alt='Login with google' />

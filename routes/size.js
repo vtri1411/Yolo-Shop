@@ -2,6 +2,8 @@ const router = require('express').Router()
 
 const { Size } = require('../models/index')
 
+const auth  = require('../middlewares/auth');
+
 // @route   GET api/size
 // @desc    Get all size
 // @access  Public
@@ -30,9 +32,13 @@ router.get('/', async (req, res) => {
 // @route   POST api/size
 // @desc    Create a new size
 // @access
-router.post('/', async (req, res) => {
+router.post('/',auth,  async (req, res) => {
 	try {
 		const { name } = req.body
+
+      if (!req?.userRoles?.include('ADMIN')) {
+			return res.json({ status: 'FAIL', message: 'No permission' })
+		}
 
 		if (!name) {
 			return res.json({

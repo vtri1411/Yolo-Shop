@@ -25,7 +25,9 @@ const InfinityList = ({ filter, sort, keyword }) => {
 
 	const [isLastPage, setIsLastPage] = useState(false)
 
-	const loadProduct = async () => {
+	const [idToRefresh, setIdToRefresh] = useState('')
+
+	const loadProduct = async (id) => {
 		if (!isLoading && !isLastPage) {
 			setShouldLoad(false)
 			setIsLoading(true)
@@ -40,6 +42,7 @@ const InfinityList = ({ filter, sort, keyword }) => {
 				})
 
 				setIsLoading(false)
+
 				if (data.status === 'SUCCESS') {
 					setProducts([...products, ...data.payload])
 					setPage(page + 1)

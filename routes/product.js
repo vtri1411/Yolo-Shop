@@ -12,8 +12,13 @@ const {
 	QueryTypes,
 	sequelize,
 } = require('../models/index')
+
+const auth = require('../middlewares/auth');
+
 const getOrderString = require('../utilities/getOrderString')
 const { getProductsQuery } = require('../utilities/query')
+
+
 
 // @route   POST GET api/product
 // @desc    Filter and get products
@@ -68,6 +73,17 @@ router.post('/filter', async (req, res) => {
 			})
 			where.push(`(${brandStr})`)
 		}
+		if (Array.isArray(gender) && gender.length > 0) {
+			let genderStr = ''
+			gender.forEach((item, index) => {
+				if (index === 0) {
+					genderStr += ` gender = ${item} `
+				} else {
+					genderStr += ` or gender = ${item} `
+				}
+			})
+			where.push(`(${genderStr})`)
+		}
 
 		if (where.length > 0) {
 			where = where.join(' and ')
@@ -76,7 +92,11 @@ router.post('/filter', async (req, res) => {
 		}
 
 		if (keyword) {
-			where += ` and MATCH(name, description) AGAINST("${keyword}" IN NATURAL LANGUAGE MODE)`
+			if (where) {
+				where += ` and MATCH(name, description) AGAINST("${keyword}" IN NATURAL LANGUAGE MODE)`
+			} else {
+				where += ` MATCH(name, description) AGAINST("${keyword}" IN NATURAL LANGUAGE MODE)`
+			}
 		}
 
 		const products = await sequelize.query(
@@ -88,6 +108,7 @@ router.post('/filter', async (req, res) => {
 			}),
 			{ type: QueryTypes.SELECT }
 		)
+
 		res.json({
 			status: 'SUCCESS',
 			message: 'Lấy danh sách sản phẩm thành công!',
@@ -149,7 +170,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST api/product
 // @desc    Create a new product
 // @access
-router.post('/', async (req, res) => {
+router.post('/',auth, async (req, res) => {
 	try {
 		const {
 			name,
@@ -163,6 +184,10 @@ router.post('/', async (req, res) => {
 			images,
 			inventory,
 		} = req.body
+
+      if (!req?.userRoles?.include('ADMIN')) {
+			return res.json({ status: 'FAIL', message: 'No permission' })
+		}
 
 		const product = await Product.create({
 			name,

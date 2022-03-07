@@ -104,7 +104,7 @@ export const registerUser =
 
 			if (data.status === 'SUCCESS') {
 				toast.update(toastId, {
-					render: 'Đăng ký thành công',
+					render: 'Đăng ký thành công, vui lòng kiểm tra email của bạn!',
 					type: 'success',
 					...toastUpdate,
 				})
@@ -176,10 +176,7 @@ export const requestResetPassword =
 					render:
 						'Đặt lại mật khẩu thành công, vui lòng kiểm tra email của bạn !',
 					type: 'success',
-					isLoading: false,
-					hideProgressBar: false,
-					autoClose: 5000,
-					position: 'top-center',
+					...toastUpdate,
 				})
 			} else {
 				toast.update(toastId, {
@@ -212,16 +209,11 @@ export const resetPassword =
 				newPassword,
 			})
 
-			console.log({ data })
-
 			if (data.status === 'SUCCESS') {
 				toast.update(toastId, {
 					render: 'Đặt lại mật khẩu thành công !',
 					type: 'success',
-					isLoading: false,
-					hideProgressBar: false,
-					autoClose: 5000,
-					position: 'top-center',
+					...toastUpdate,
 				})
 
 				dispatch(loadUser())
@@ -249,6 +241,7 @@ export const resetPassword =
 export const changeInfo =
 	({ name, phone, avatar, address }) =>
 	async (dispatch) => {
+		const toastId = toast.loading('Đang đổi thông tin . . .')
 		try {
 			const { data } = await axios.post('/api/user/changeInfo', {
 				name,
@@ -256,18 +249,25 @@ export const changeInfo =
 				avatar,
 				address,
 			})
-
 			if ((data.status = 'SUCCESS')) {
 				dispatch({
 					type: userTypes.CHANGE_USER_INFO,
 					payload: { name, phone, avatar, address },
 				})
-				return toast.success('Đổi thông tin thành công!')
+				return toast.update(toastId, {
+					render: 'Đổi thông tin thành công!',
+					type: 'success',
+					...toastUpdate,
+				})
 			}
 		} catch (error) {
 			console.log(error)
 		}
-		toast.error('Đổi thông tin thất bại!')
+		toast.update(toastId, {
+			render: 'Đổi thông tin thất bại!',
+			type: 'error',
+			...toastUpdate,
+		})
 	}
 
 export const changePassword =

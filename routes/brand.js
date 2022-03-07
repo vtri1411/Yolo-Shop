@@ -2,6 +2,8 @@ const router = require('express').Router()
 
 const { Brand } = require('../models/index')
 
+const auth = require('../middlewares/auth')
+
 // @route   GET api/brand
 // @desc    Get brand data
 // @access  Public
@@ -30,8 +32,12 @@ router.get('/', async (req, res) => {
 // @route   POST api/brand
 // @desc    Create a new brand
 // @access
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
 	try {
+		if (!req?.userRoles?.include('ADMIN')) {
+			return res.json({ status: 'FAIL', message: 'No permission' })
+		}
+
 		const { brandName } = req.body
 
 		if (!brandName) {

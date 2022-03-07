@@ -47,7 +47,6 @@ export const changeQuantity =
 export const addProduct =
 	({ inventoryId, quantity }) =>
 	async (dispatch) => {
-		console.log({ inventoryId, quantity })
 		try {
 			const { data } = await axios.post('/api/cart/addProduct', {
 				inventoryId,

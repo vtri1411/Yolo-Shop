@@ -2,6 +2,8 @@ const router = require('express').Router()
 
 const { Color } = require('../models/index')
 
+const auth = require('../middlewares/auth')
+
 // @route   GET api/size
 // @desc    Get collection size
 // @access  Public
@@ -32,6 +34,10 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
 	try {
 		const { colorName, hex } = req.body
+
+      if (!req?.userRoles?.include('ADMIN')) {
+			return res.json({ status: 'FAIL', message: 'No permission' })
+		}
 
 		if (!colorName || !hex) {
 			return res.json({

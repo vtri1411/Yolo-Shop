@@ -13,7 +13,7 @@ const OAuth = () => {
 
 	const dispatch = useDispatch()
 
-	useEffect(async () => {
+	useEffect(() => {
 		const loginUser = async () => {
 			const hash = locationHashParser(window.location.hash)
 			try {

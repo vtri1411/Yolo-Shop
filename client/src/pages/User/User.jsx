@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
+
+import blankAvatar from '../../assets/images/blank_avt.png'
+
 import Helmet from '../../components/Helmet'
+
 import ChangePassword from './ChangePassword'
 import OrderDetail from './OrderDetail'
 import OrderHistory from './OrderHistory'
@@ -28,7 +32,10 @@ const User = () => {
 					</div>
 					<div className='user__sidebar__widget'>
 						<div className='user__sidebar__avatar'>
-							<img src={user.avatar ? user.avatar : ''} alt='' />
+							<img
+								src={user.avatar ? user.avatar : blankAvatar}
+								alt=''
+							/>
 						</div>
 						<div className='user__sidebar__info'>
 							<div className='user__sidebar__info__name'>

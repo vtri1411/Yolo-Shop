@@ -9,13 +9,13 @@ import { setShowProductModal } from '../redux/product/product.actions'
 
 import Button from '../components/Button'
 import Quantity from '../components/Quantity'
-import { getProductById } from '../redux/product/product.actions'
 import numberWithCommas from '../utilities/numberWithCommas'
 
+const mapState = ({ user }) => ({ user: user.user })
 const ProductView = ({ product, isModal }) => {
 	const dispatch = useDispatch()
 
-	console.log({ product })
+	const { user } = useSelector(mapState)
 
 	const history = useHistory()
 
@@ -91,6 +91,11 @@ const ProductView = ({ product, isModal }) => {
 	}
 
 	const check = () => {
+		if (!user) {
+			toast.dismiss()
+			toast.error('Vui lòng đăng nhập!')
+		}
+
 		if (color.id === '') {
 			toast.dismiss()
 			toast.error('Vui lòng chọn màu sắc!')

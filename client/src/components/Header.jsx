@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 import screenWidth from '../screenWidth'
 
 import { logOutUser } from '../redux/user/user.actions'
-import { changeQuantity } from '../redux/cart/cart.actions'
+import { changeQuantity, deleteProduct } from '../redux/cart/cart.actions'
 
 import logo from '../assets/images/Logo-2.png'
 import emptyCartImg from '../assets/images/empty-cart.png'
@@ -70,6 +70,10 @@ const Header = (props) => {
 		dispatch(logOutUser(history))
 	}, [])
 
+	const handleRemoveCart = (inventoryId) => {
+		dispatch(deleteProduct({ inventoryId }))
+	}
+
 	useEffect(() => {
 		const shrinkHeader = () => {
 			if (window.scrollY >= 50) {
@@ -123,7 +127,9 @@ const Header = (props) => {
 					</div>
 					<div className='header__nav__right'>
 						<div className='header__nav__item header__nav__icon header__nav__right__item'>
-							<i className='bx bx-search'></i>
+							<Link to='/catalog'>
+								<i className='bx bx-search'></i>
+							</Link>
 						</div>
 						<div className='header__nav__item header__nav__icon header__nav__right__item header__nav__cart '>
 							<Link className='header__nav__cart__link' to='/cart'>
@@ -195,7 +201,12 @@ const Header = (props) => {
 															size='sm'
 														/>
 													</div>
-													<div className='header__nav__cart__panel__product__remove'>
+													<div
+														className='header__nav__cart__panel__product__remove'
+														onClick={() =>
+															handleRemoveCart(item.inventoryId)
+														}
+													>
 														<i className='bx bx-trash'></i>
 													</div>
 												</div>

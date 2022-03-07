@@ -38,8 +38,8 @@ const sortOptions = [
 ]
 
 const genderList = [
-	{ id: 'MALE', name: 'Nam' },
-	{ id: 'FEMALE', name: 'Nữ' },
+	{ id: 1, name: 'Nam' },
+	{ id: 0, name: 'Nữ' },
 ]
 
 const Catalog = () => {
@@ -47,7 +47,7 @@ const Catalog = () => {
 
 	const filterRef = useRef(null)
 
-	const { products, brands, categories, colors, sizes } = useSelector(mapState)
+	const { brands, categories, colors, sizes } = useSelector(mapState)
 
 	const [activeFilter, setActiveFilter] = useState(false)
 
@@ -58,11 +58,18 @@ const Catalog = () => {
 		brand: [],
 		gender: [],
 	}
+
 	const [filter, setFilter] = useState(initialFilter)
 
 	const [keyword, setKeyword] = useState('')
 
 	const [sort, setSort] = useState('')
+
+	const [confirmFilter, setConfirmFilter] = useState({
+		filter: {},
+		keyword: '',
+		sort: '',
+	})
 
 	const handleSetCheckFilter = (id, type) => {
 		switch (type) {
@@ -144,6 +151,10 @@ const Catalog = () => {
 		setFilter(initialFilter)
 	}
 
+	const handleConfirmFilter = () => {
+		setConfirmFilter({ filter, keyword, sort })
+	}
+
 	useEffect(() => {
 		if (activeFilter) {
 			filterRef.current.classList.add('active')
@@ -151,10 +162,6 @@ const Catalog = () => {
 			filterRef.current.classList.remove('active')
 		}
 	}, [activeFilter])
-
-	// useEffect(() => {
-	// 	dispatch(getProducts({ limit: 10 }))
-	// }, [])
 
 	return (
 		<Helmet title='Danh mục'>
@@ -170,17 +177,31 @@ const Catalog = () => {
 					</div>
 
 					<div className='catalog__filter__widget'>
+						<Button onClick={handleResetFilter}>Xóa bộ lọc</Button>
+					</div>
+
+					<div className='catalog__filter__widget'>
+						<Button onClick={handleConfirmFilter}>Lọc sản phẩm</Button>
+					</div>
+
+					<div className='catalog__filter__widget'>
 						<div className='catalog__filter__widget__title'>
 							<h3>Từ khoá</h3>
 						</div>
-						<div className='catalog__filter__input'>
+						<form
+							className='catalog__filter__input'
+							onSubmit={(e) => {
+								e.preventDefault()
+								handleConfirmFilter()
+							}}
+						>
 							<Input
 								type={'text'}
 								value={keyword}
 								onChange={(e) => setKeyword(e.target.value)}
 								placeholder={'Nhập từ khoá'}
 							/>
-						</div>
+						</form>
 					</div>
 
 					<div className='catalog__filter__widget'>
@@ -196,6 +217,30 @@ const Catalog = () => {
 					</div>
 
 					<FilterWidget
+						list={genderList}
+						title='Giới tính'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.GENDER}
+						handleChangeFilter={handleChangeFilter}
+					/>
+
+					<FilterWidget
+						list={sizes}
+						title='Size'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.SIZE}
+						handleChangeFilter={handleChangeFilter}
+					/>
+
+					<FilterWidget
+						list={colors}
+						title='Màu sắc'
+						handleSetCheckFilter={handleSetCheckFilter}
+						type={filterType.COLOR}
+						handleChangeFilter={handleChangeFilter}
+					/>
+
+					<FilterWidget
 						list={brands}
 						title='Thương hiệu'
 						handleSetCheckFilter={handleSetCheckFilter}
@@ -209,38 +254,12 @@ const Catalog = () => {
 						type={filterType.CATEGORY}
 						handleChangeFilter={handleChangeFilter}
 					/>
-
-					<FilterWidget
-						list={genderList}
-						title='Giới tính'
-						handleSetCheckFilter={handleSetCheckFilter}
-						type={filterType.GENDER}
-						handleChangeFilter={handleChangeFilter}
-					/>
-					<FilterWidget
-						list={colors}
-						title='Màu sắc'
-						handleSetCheckFilter={handleSetCheckFilter}
-						type={filterType.COLOR}
-						handleChangeFilter={handleChangeFilter}
-					/>
-					<FilterWidget
-						list={sizes}
-						title='Size'
-						handleSetCheckFilter={handleSetCheckFilter}
-						type={filterType.SIZE}
-						handleChangeFilter={handleChangeFilter}
-					/>
-
-					<div className='catalog__filter__widget'>
-						<Button onClick={handleResetFilter}>Xóa bộ lọc</Button>
-					</div>
 				</div>
 				<div className='catalog__filter__toggle'>
 					<Button onClick={() => setActiveFilter(true)}>Bộ lọc</Button>
 				</div>
 				<div className='catalog__product'>
-					<InfiniteList filter={filter} sort={sort} keyword={keyword} />
+					<InfiniteList {...confirmFilter} />
 				</div>
 			</div>
 			<Maginer />
