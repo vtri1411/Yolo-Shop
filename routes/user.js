@@ -273,10 +273,7 @@ router.post('/recovery/request', async (req, res) => {
 		const { email } = req.body
 		const user = await User.findOne({ where: { email: email } })
 
-		const redirectUrl =
-			process.env.NODE_ENV === 'production'
-				? `http://${process.env.RAILWAY_STATIC_URL}/recovery/reset`
-				: 'http://localhost:3000/recovery/reset'
+		const redirectUrl = `http://${process.env.HOST_ADDRESS}/recovery/reset`
 
 		// Check user exist
 		if (!user) {

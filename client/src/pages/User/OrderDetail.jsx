@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { useTable } from 'react-table'
 
-import data2 from './data2'
 import orderDetailColumn from '../../config/table/orderDetailColumn'
 
 import Button from '../../components/Button'
@@ -12,7 +11,6 @@ import UserFormGroup from '../../components/User/UserFormGroup'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-	getOrderDetail,
 	getOrderDetails,
 } from '../../redux/order/order.actions'
 
@@ -39,14 +37,6 @@ const OrderDetail = () => {
 		}
 		dispatch(getOrderDetails(id))
 	}
-
-	// useEffect(() => {
-	// 	if (id) {
-	// 		dispatch(getOrderDetails(id))
-	// 	}
-	// }, [id])
-
-	console.log({ id })
 
 	return (
 		<div className='user__content__wrapper'>

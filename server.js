@@ -1,4 +1,13 @@
-require('dotenv').config()
+const dotenv = require('dotenv')
+
+if (process.env.NODE_ENV === 'production') {
+	dotenv.config()
+} else {
+	dotenv.config({
+		path: '.env.dev',
+	})
+}
+
 const express = require('express')
 const { urlencoded } = require('express')
 const cookieParser = require('cookie-parser')

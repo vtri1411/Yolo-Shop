@@ -5,11 +5,15 @@ import { useDispatch } from 'react-redux'
 import googleLoginImg from '../../assets/images/btn_google_login.png'
 
 import validateInput, { TYPE } from '../../utilities/validateInput'
-import googleOauthUrl from '../../utilities/googleOauthUrl'
+import { githubOauthUrl, googleOauthUrl } from '../../utilities/getOAuthUrl'
 
 import { loginUser } from '../../redux/user/user.actions'
 
 import { toast } from 'react-toastify'
+import {
+	GoogleLoginButton,
+	GithubLoginButton,
+} from 'react-social-login-buttons'
 
 import Helmet from '../../components/Helmet'
 import AuthContainer from '../../components/Auth/AuthContainer'
@@ -90,8 +94,6 @@ const Login = () => {
 					<Button>Đăng nhập</Button>
 				</AuthForm>
 
-				{/* <AuthError error={loginError} /> */}
-
 				<div className='auth__link'>
 					<div className='auth__link__item'>
 						<Link to='/recovery' className='auth__link__item__link'>
@@ -110,7 +112,10 @@ const Login = () => {
 
 				<div className='auth__oauth'>
 					<a className='auth__oauth__item' href={googleOauthUrl}>
-						<img src={googleLoginImg} alt='Login with google' />
+						<GoogleLoginButton className='auth__oauth__item__btn' />
+					</a>
+					<a className='auth__oauth__item' href={githubOauthUrl}>
+						<GithubLoginButton className='auth__oauth__item__btn' />
 					</a>
 				</div>
 			</AuthContainer>

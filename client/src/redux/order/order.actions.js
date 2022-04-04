@@ -23,7 +23,8 @@ export const getOrderHistory = () => async (dispatch) => {
 
 export const getOrderDetails = (id) => async (dispatch) => {
 	try {
-		const { data } = await axios.get(`/api/order/${id}`)
+		dispatch(clearOrderDetails())
+   		const { data } = await axios.get(`/api/order/${id}`)
 		if (data.status === 'SUCCESS') {
 			return dispatch({
 				type: orderTypes.SET_ORDER_DETAILS,
@@ -76,3 +77,8 @@ export const orderProducts = () => async (dispatch) => {
 		...toastUpdate,
 	})
 }
+
+export const clearOrderDetails = () => ({
+	type: orderTypes.SET_ORDER_DETAILS,
+	payload: [],
+})

@@ -1,45 +1,23 @@
 const { DataTypes, Sequelize, Op, QueryTypes } = require('sequelize')
 
-const sequelize =
-	process.env.NODE_ENV === 'production'
-		? new Sequelize(
-				process.env.MYSQLDATABASE,
-				process.env.MYSQLUSER,
-				process.env.MYSQLPASSWORD,
-				{
-					host: process.env.MYSQLHOST,
-					dialect: 'mysql',
-					logging: false,
-					port: process.env.MYSQLPORT,
+const sequelize = new Sequelize(
+	process.env.MYSQLDATABASE,
+	process.env.MYSQLUSER,
+	process.env.MYSQLPASSWORD,
+	{
+		host: process.env.MYSQLHOST,
+		dialect: 'mysql',
+		logging: false,
+		port: process.env.MYSQLPORT,
 
-					pool: {
-						max: 5,
-						min: 1,
-						acquire: 30000,
-						idle: 10000,
-					},
-				}
-		  )
-		: new Sequelize(
-				process.env.LC_MYSQLDATABASE,
-				process.env.LC_MYSQLUSER,
-				process.env.LC_MYSQLPASSWORD,
-				{
-					host: process.env.LC_MYSQLHOST,
-					port: process.env.LC_MYSQLPORT,
-					dialect: 'mysql',
-					// Default sql port
-					port: 3306,
-					logging: false,
-
-					pool: {
-						max: 5,
-						min: 1,
-						acquire: 30000,
-						idle: 10000,
-					},
-				}
-		  )
+		pool: {
+			max: 5,
+			min: 1,
+			acquire: 30000,
+			idle: 10000,
+		},
+	}
+)
 
 sequelize
 	.authenticate()

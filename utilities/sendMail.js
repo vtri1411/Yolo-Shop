@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer')
 const { google } = require('googleapis')
-const constants = require('../config/constants')
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
@@ -62,7 +61,7 @@ const sendRecoveryMail = async (userId, email, secretString, redirectUrl) => {
 
 const sendVerificationMail = async (userId, email, secretString) => {
 	// Send email to the user
-	const link = `http://${process.env.RAILWAY_STATIC_URL}/api/user/verification/${userId}/${secretString}`
+	const link = `http://${process.env.HOST_ADDRESS}/api/user/verification/${userId}/${secretString}`
 
 	try {
 		await sendMail({

@@ -88,6 +88,7 @@ export const registerUser =
 	async (dispatch) => {
 		const toastId = toast.loading('Đang đăng ký, vui lòng chờ . . .')
 
+		console.log({ idFirst: toastId })
 		try {
 			const { data } = await axios.post(
 				'/api/user',
@@ -112,11 +113,17 @@ export const registerUser =
 				return history.push('/verification-user')
 			}
 
-			switch (data.error) {
+			switch (data.code) {
 				case 606:
-					toast.error('Email đã được sử dụng!')
-				default:
+					console.log({ code: data.code })
+					toast.update(toastId, {
+						render: 'Email đã được sử dụng!',
+						type: 'error',
+						...toastUpdate,
+					})
 					return
+				default:
+					throw new Error()
 			}
 		} catch (error) {
 			console.log(error)
