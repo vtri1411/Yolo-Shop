@@ -23,4 +23,16 @@ select products.*, (
  ${offset ? ` offset ${offset}` : ''}
 `
 
-module.exports = { getUserCartQuery, getProductsQuery }
+const getProductsWithCountQuery = `
+  select products.*, categories.name as 'categoryName', brands.name as 'brandName' , count(*) as 'count' from products
+  left join inventories on inventories.productId = products.id
+  left join brands on brands.id = products.brandId
+  left join categories on categories.id = products.categoryId
+  group by products.id
+`
+
+module.exports = {
+	getUserCartQuery,
+	getProductsQuery,
+	getProductsWithCountQuery,
+}

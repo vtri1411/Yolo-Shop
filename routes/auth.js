@@ -2,7 +2,6 @@ const router = require('express').Router()
 const axios = require('axios')
 const bcryptjs = require('bcryptjs')
 
-
 const auth = require('../middlewares/auth')
 
 const { User, UserRole, sequelize } = require('../models/index')
@@ -65,6 +64,91 @@ router.post('/login', async (req, res) => {
 				status: 'FAIL',
 				code: 603,
 				message: 'Email chưa được xác minh!',
+			})
+		}
+
+		setAuthCooki({
+			res,
+			userId: user.id,
+			userRoles: user.userRoles.map((item) => item.role),
+		})
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Đăng nhập thành công!',
+			payload: user,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   POST api/auth/login
+// @desc    Login a admin
+// @access  Public
+router.post('/login/admin', async (req, res) => {
+	try {
+		const { email, password } = req.body
+
+		if (!email || !checkIsEmail(email)) {
+			return res.json({
+				status: 'FAIL',
+				code: 001,
+				message: 'Email không hợp lệ!',
+			})
+		}
+
+		const user = await User.findOne({
+			where: { email },
+			include: [
+				{
+					model: UserRole,
+					required: true,
+					attributes: ['role'],
+				},
+			],
+		})
+
+		if (!user) {
+			return res.json({
+				status: 'FAIL',
+				code: 601,
+				message: 'Email không tồn tại!',
+			})
+		}
+
+		if (!user.password) {
+			return res.json({
+				status: 'FAIL',
+				code: 613,
+				message: 'Vui lòng đăng nhập bằng phương thức khác!',
+			})
+		}
+
+		if (!bcryptjs.compareSync(password, user.password)) {
+			return res.json({
+				status: 'FAIL',
+				code: '002',
+				message: 'Mật khẩu không đúng!',
+			})
+		}
+
+		if (user.verified === false) {
+			return res.json({
+				status: 'FAIL',
+				code: 603,
+				message: 'Email chưa được xác minh!',
+			})
+		}
+
+		const print = JSON.parse(JSON.stringify(user))
+
+		if (!user?.userRoles?.some((userRole) => userRole.role === 'ADMIN')) {
+			return res.json({
+				status: 'FAIL',
+				code: 614,
+				message: 'Tài khoản không phải admin!',
 			})
 		}
 

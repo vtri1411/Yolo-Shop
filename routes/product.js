@@ -1,5 +1,4 @@
 const router = require('express').Router()
-
 const {
 	Product,
 	Brand,
@@ -12,13 +11,29 @@ const {
 	QueryTypes,
 	sequelize,
 } = require('../models/index')
-
-const auth = require('../middlewares/auth');
+const auth = require('../middlewares/auth')
+const cloudinary = require('cloudinary').v2
 
 const getOrderString = require('../utilities/getOrderString')
-const { getProductsQuery } = require('../utilities/query')
+const {
+	getProductsQuery,
+	getProductsWithCountQuery,
+} = require('../utilities/query')
+const adminAuth = require('../middlewares/admin-auth')
 
-
+// @route   GET api/admin/product
+// @desc    Get products and count
+// @access  Admin
+router.get('/admin', adminAuth, async (req, res) => {
+	try {
+		const products = await sequelize.query(getProductsWithCountQuery, {
+			type: QueryTypes.SELECT,
+		})
+		res.json({ products })
+	} catch (error) {
+		console.log(error)
+	}
+})
 
 // @route   POST GET api/product
 // @desc    Filter and get products
@@ -169,8 +184,8 @@ router.get('/:id', async (req, res) => {
 
 // @route   POST api/product
 // @desc    Create a new product
-// @access
-router.post('/',auth, async (req, res) => {
+// @access  Admin
+router.post('/', adminAuth, async (req, res) => {
 	try {
 		const {
 			name,
@@ -184,10 +199,6 @@ router.post('/',auth, async (req, res) => {
 			images,
 			inventory,
 		} = req.body
-
-      if (!req?.userRoles?.include('ADMIN')) {
-			return res.json({ status: 'FAIL', message: 'No permission' })
-		}
 
 		const product = await Product.create({
 			name,
@@ -203,9 +214,23 @@ router.post('/',auth, async (req, res) => {
 		// Upload image
 		if (Array.isArray(images)) {
 			const promises = []
+
 			images.forEach((image) => {
-				promises.push(Image.create({ url: image, productId: product.id }))
+				promises.push(
+					cloudinary.uploader.upload(image, {
+						upload_preset: 'Yolo_Shop',
+						unique_filename: true,
+					})
+				)
 			})
+
+			const uploadImageResult = await Promise.all(promises)
+			promises.length = 0
+
+			uploadImageResult.forEach(({ secure_url }) => {
+				promises.push(Image.create({ url: secure_url, productId: product.id }))
+			})
+
 			await Promise.all(promises)
 		}
 
@@ -230,6 +255,108 @@ router.post('/',auth, async (req, res) => {
 			message: 'Thêm sản phẩm thành công!',
 			payload: product,
 		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   PATCH api/product
+// @desc    Edit product
+// @access  Admin
+// adminAuth,
+router.patch('/:id', async (req, res) => {
+	try {
+		const {
+			name,
+			description,
+			available,
+			unit,
+			price,
+			categoryId,
+			gender,
+			brandId,
+			images,
+			inventory,
+		} = req.body
+		const { id } = req.params
+
+		const product = await Product.findByPk(id)
+
+		const promises = []
+
+		const updateObj = {
+			...(name && { name }),
+			...(description && { description }),
+			...(available && { available }),
+			...(unit && { unit }),
+			...(price && { price }),
+			...(categoryId && { categoryId }),
+			...(brandId && { brandId }),
+			...(gender && { gender }),
+		}
+
+		// Upload product, delete old image, delete old inventory
+		promises.push(product.update(updateObj))
+
+		if (Array.isArray(images)) {
+			promises.push(Image.destroy({ where: { productId: product.id } }))
+		}
+		if (Array.isArray(inventory)) {
+			promises.push(Inventory.destroy({ where: { productId: product.id } }))
+		}
+
+		await Promise.all(promises)
+
+		if (Array.isArray(images)) {
+			promises.length = 0
+			images.forEach((image) => {
+				promises.push(
+					cloudinary.uploader.upload(image, {
+						upload_preset: 'Yolo_Shop',
+						unique_filename: true,
+					})
+				)
+			})
+			const uploadImageResult = await Promise.all(promises)
+			promises.length = 0
+			uploadImageResult.forEach(({ secure_url }) => {
+				promises.push(Image.create({ url: secure_url, productId: product.id }))
+			})
+
+			await Promise.all(promises)
+		}
+
+		if (Array.isArray(inventory)) {
+			promises.length = 0
+			inventory.forEach((item) => {
+				promises.push(
+					Inventory.create({
+						amount: item.amount,
+						sizeId: item.size,
+						colorId: item.color,
+						productId: product.id,
+					})
+				)
+			})
+			await Promise.all(promises)
+		}
+
+		return res.json({ status: 'FAIL', payload: product })
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   DELETE api/product
+// @desc    Delete products
+// @access  Admin
+router.delete('/', async (req, res) => {
+	try {
+		const { ids } = req.body
+		await Product.destroy({ where: { id: ids } })
+		res.sendStatus(200)
 	} catch (error) {
 		console.log(error)
 		res.sendStatus(500)

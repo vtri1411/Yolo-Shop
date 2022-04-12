@@ -53,9 +53,7 @@ const ProductView = ({ product, isModal }) => {
 				if (!size.id || item.size.id === size.id) {
 					if (
 						tempColors.length === 0 ||
-						!tempColors.some(
-							(tempColor) => tempColor.id === item.color.id
-						)
+						!tempColors.some((tempColor) => tempColor.id === item.color.id)
 					) {
 						tempColors.push(item.color)
 					}
@@ -94,6 +92,7 @@ const ProductView = ({ product, isModal }) => {
 		if (!user) {
 			toast.dismiss()
 			toast.error('Vui lòng đăng nhập!')
+			return false
 		}
 
 		if (color.id === '') {
@@ -177,9 +176,7 @@ const ProductView = ({ product, isModal }) => {
 				<div className={`product__desc`}>
 					<h4 className='product__desc__title'>Chi tiết sản phẩm</h4>
 					<p
-						className={`product__desc__content  ${
-							expandDesc ? 'active' : ''
-						}`}
+						className={`product__desc__content  ${expandDesc ? 'active' : ''}`}
 						dangerouslySetInnerHTML={{ __html: product.description }}
 					></p>
 					<div className='product__desc__btn'>
@@ -286,9 +283,7 @@ const ProductView = ({ product, isModal }) => {
 					/>
 				</div>
 				<div className='product__info__item'>
-					<div className='product__info__item__title'>
-						Còn lại trong kho:
-					</div>
+					<div className='product__info__item__title'>Còn lại trong kho:</div>
 					<div className='product__info__item__text minor'>
 						{amount > 0 ? amount : '--'}
 						<span> {product.unit}</span>
@@ -303,9 +298,7 @@ const ProductView = ({ product, isModal }) => {
 			<div className={`product__desc mobile`}>
 				<h4 className='product__desc__title'>Chi tiết sản phẩm</h4>
 				<p
-					className={`product__desc__content  ${
-						expandDesc ? 'active' : ''
-					}`}
+					className={`product__desc__content  ${expandDesc ? 'active' : ''}`}
 					dangerouslySetInnerHTML={{ __html: product.description }}
 				></p>
 				<div className='product__desc__btn'>

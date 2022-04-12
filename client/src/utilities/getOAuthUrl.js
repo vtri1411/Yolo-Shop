@@ -20,6 +20,8 @@ const getGoogleUrl = () => {
 	return `${rootUrl}?${qs.toString()}`
 }
 
+console.log({ clientId: process.env.GITHUB_CLIENT_ID })
+
 const getGithubUrl = () => {
 	const rootUrl = 'https://github.com/login/oauth/authorize'
 
@@ -27,15 +29,14 @@ const getGithubUrl = () => {
 
 	console.log({
 		client_id: process.env.GITHUB_CLIENT_ID,
-		redirect_uri: process.env.GITHUB_CLIENT_SECRET,
 		scope: 'email user',
 	})
 
 	const options =
 		process.env.NODE_ENV === 'production'
 			? {
-					client_id: process.env.GITHUB_CLIENT_ID,
-					redirect_uri: process.env.GITHUB_CLIENT_SECRET,
+					client_id: 'f8d9dadf3f9ed6730285',
+					redirect_uri: `https://yolo-shop.up.railway.app/oauth/github`,
 					scope: 'email user',
 			  }
 			: {

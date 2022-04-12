@@ -2,8 +2,6 @@ import React, { useCallback, useState } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 
-import googleLoginImg from '../../assets/images/btn_google_login.png'
-
 import validateInput, { TYPE } from '../../utilities/validateInput'
 import { githubOauthUrl, googleOauthUrl } from '../../utilities/getOAuthUrl'
 
@@ -69,9 +67,7 @@ const Login = () => {
 						value={email.value}
 						error={email.error}
 						labelText={'Email'}
-						onChange={(e) =>
-							setEmail({ ...email, value: e.target.value })
-						}
+						onChange={(e) => setEmail({ ...email, value: e.target.value })}
 						onBlur={validateEmail}
 						placeholder='Nhập email của bạn'
 						id={'login-email'}
@@ -101,9 +97,7 @@ const Login = () => {
 						</Link>
 					</div>
 					<div className='auth__link__item'>
-						<span className='auth__link__item__text'>
-							Chưa có tài khoản?
-						</span>
+						<span className='auth__link__item__text'>Chưa có tài khoản?</span>
 						<Link to='/register' className='auth__link__item__link'>
 							Đăng ký
 						</Link>
@@ -114,6 +108,7 @@ const Login = () => {
 					<a className='auth__oauth__item' href={googleOauthUrl}>
 						<GoogleLoginButton className='auth__oauth__item__btn' />
 					</a>
+					{console.log(githubOauthUrl)}
 					<a className='auth__oauth__item' href={githubOauthUrl}>
 						<GithubLoginButton className='auth__oauth__item__btn' />
 					</a>

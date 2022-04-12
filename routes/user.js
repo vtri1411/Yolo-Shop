@@ -27,6 +27,8 @@ const {
 } = require('../utilities/sendMail')
 const createAndHashSecretString = require('../utilities/createAndHashSecretString')
 const setAuthCooki = require('../utilities/setAuthCooki')
+const { getCloudinaryPublicId } = require('../utilities/getCloudinaryPublicId')
+const adminAuth = require('../middlewares/admin-auth')
 
 // @route   GET api/user
 // @desc    Get user's account detail
@@ -57,6 +59,240 @@ router.get('/', auth, async (req, res) => {
 	}
 })
 
+// @route   GET api/user/admin
+// @desc    Get admin user's account detail
+// @access  Private
+router.get('/admin', auth, async (req, res) => {
+	try {
+		const user = await User.findByPk(req.userId, {
+			attributes: { exclude: ['password'] },
+			include: [
+				{
+					model: UserRole,
+					required: true,
+					attributes: ['role'],
+				},
+			],
+		})
+
+		if (!user?.userRoles?.some((userRole) => userRole.role === 'ADMIN')) {
+			return res.json({
+				status: 'FAIL',
+				code: 614,
+				message: 'Tài khoản không phải admin!',
+			})
+		}
+
+		// If there is no user match with cookie, delete cookie
+		if (!user) {
+			res.cookie('jwt', '', { maxAge: 0, httpOnly: true })
+			return res.json({
+				status: 'FAIL',
+				message: 'Cookie không hợp lệ!',
+			})
+		}
+
+		res.json({
+			status: 'SUCCESS',
+			message: 'Get user success!',
+			payload: user,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   GET api/user/admin/:userId
+// @desc    Admin get user's account detail
+// @access  Admin
+router.get('/admin/:id', adminAuth, async (req, res) => {
+	try {
+		const { id } = req.params
+		const user = await User.findByPk(id, {
+			attributes: { exclude: ['password'] },
+			include: [
+				{
+					model: UserRole,
+				},
+			],
+		})
+
+		res.json({
+			status: 'SUCCESS',
+			payload: user,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   GET api/user/list
+// @desc    Get user's account list
+// @access  Admin
+router.get('/list', adminAuth, async (req, res) => {
+	try {
+		const users = await User.findAll({
+			attributes: {
+				exclude: ['password'],
+			},
+			include: [
+				{
+					model: UserRole,
+				},
+			],
+		})
+		res.json({ status: 'SUCCESS', payload: users })
+	} catch {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   POST api/user/admin/create
+// @desc    Admin create a new user
+// @access  Public
+router.post('/admin/create', adminAuth, async (req, res) => {
+	try {
+		const { email, phone, password, name, address, verified, avatar, roles } =
+			req.body
+
+		const promises = []
+
+		const existUser = await User.findOne({ where: { email } })
+		if (existUser) {
+			return res.json({
+				status: 'FAIL',
+				message: 'Email đã tồn tại!',
+				code: 606,
+			})
+		}
+
+		const hashPassword = await bcryptjs.hash(password, constants.TIMES_GEN_SALT)
+		const userObj = {
+			...(email && { email }),
+			...(phone && { phone }),
+			...(password && { password: hashPassword }),
+			...(name && { name }),
+			...(address && { address }),
+			...(verified && { verified }),
+		}
+
+		if (avatar) {
+			const { secure_url } = await cloudinary.uploader.upload(avatar, {
+				upload_preset: 'Yolo_Shop',
+				unique_filename: true,
+			})
+			userObj.avatar = secure_url
+		}
+
+		const user = await User.create(userObj, {
+			attributes: {
+				exclude: ['password'],
+			},
+		})
+
+		roles.forEach((role) => {
+			promises.push(
+				UserRole.create({
+					role,
+					userId: user.id,
+				})
+			)
+		})
+
+		await Promise.all(promises)
+
+		res.json({
+			status: 'SUCCESS',
+			payload: user,
+		})
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   PATCH api/user/admin/:id
+// @desc    Admin update user account
+// @access  Public
+router.patch('/admin/:id', adminAuth, async (req, res) => {
+	try {
+		const { id } = req.params
+		const { phone, password, name, address, verified, avatar, roles } = req.body
+		const promises = []
+
+		const user = await User.findByPk(id)
+		if (!user) {
+			return res.json({
+				status: 'FAIL',
+				message: 'User not found!',
+				code: 606,
+			})
+		}
+
+		const hashPassword = await bcryptjs.hash(password, constants.TIMES_GEN_SALT)
+		const updateObj = {
+			...(phone && { phone }),
+			...(password && { password: hashPassword }),
+			...(name && { name }),
+			...(address && { address }),
+			...(verified && { verified }),
+		}
+
+		cloudinary.uploader.destroy(getCloudinaryPublicId(user.avatar))
+		if (avatar) {
+			const { secure_url } = await cloudinary.uploader.upload(avatar, {
+				upload_preset: 'Yolo_Shop',
+				unique_filename: true,
+			})
+			updateObj.avatar = secure_url
+		} else {
+			updateObj.avatar = null
+		}
+
+		promises.push(user.update(updateObj))
+		promises.push(UserRole.destroy({ where: { userId: id } }))
+
+		await Promise.all(promises)
+
+		promises.length = 0
+
+		roles.forEach((role) => {
+			promises.push(
+				UserRole.create({
+					role,
+					userId: user.id,
+				})
+			)
+		})
+
+		await Promise.all(promises)
+
+		res.json({ status: 'SUCCESS', payload: user })
+
+		// Delete role and add new role
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
+// @route   DELETE api/user
+// @desc    Delete user
+// @access  Public
+router.delete('/', adminAuth, async (req, res) => {
+	try {
+		const { ids } = req.body
+		await User.destroy({ where: { id: ids } })
+		res.json({ status: 'SUCCESS' })
+	} catch (error) {
+		console.log(error)
+		res.sendStatus(500)
+	}
+})
+
 // @route   POST api/user
 // @desc    Create a new user
 // @access  Public
@@ -77,10 +313,7 @@ router.post('/', async (req, res) => {
 		}
 
 		// Create hashPassword
-		const hashPassword = await bcryptjs.hash(
-			password,
-			constants.TIMES_GEN_SALT
-		)
+		const hashPassword = await bcryptjs.hash(password, constants.TIMES_GEN_SALT)
 
 		// Create user, create user verification,
 		// create user's roles, send verufication email
@@ -98,8 +331,6 @@ router.post('/', async (req, res) => {
 			}
 		)
 
-		console.log('go after create user')
-
 		// Create secretString and secretString hashed
 		const { secretString, hashString } = createAndHashSecretString(user.id)
 
@@ -109,8 +340,7 @@ router.post('/', async (req, res) => {
 				{
 					userId: user.id,
 					expiredAt: new Date(
-						Date.now() +
-							Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME)
+						Date.now() + Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME)
 					),
 					secret: hashString,
 				},
@@ -124,8 +354,6 @@ router.post('/', async (req, res) => {
 				{ transaction }
 			),
 		])
-
-		console.log('go after create userverification')
 
 		await sendVerificationMail(user.id, email, secretString)
 		await transaction.commit()
@@ -159,6 +387,7 @@ router.post('/verification/resend', async (req, res) => {
 				message: 'Email không tồn tại trong hệ thống!',
 			})
 		}
+
 		if (user.verified) {
 			return res.json({
 				status: 'FAIL',
@@ -178,8 +407,7 @@ router.post('/verification/resend', async (req, res) => {
 			UserVerification.create({
 				userId: user.id,
 				expiredAt:
-					Date.now() +
-					Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
+					Date.now() + Number.parseInt(process.env.VERIFICATION_EXPIRES_TIME),
 				secret: hashString,
 			}),
 		])
@@ -417,22 +645,19 @@ router.post('/changeInfo', auth, async (req, res) => {
 
 		if (avatar) {
 			// Upload new image
-			const { secure_url } = await cloudinary.uploader.upload(avatar, {
-				upload_preset: 'Yolo_Shop',
-				unique_filename: true,
-			})
+			const { secure_url, public_id } = await cloudinary.uploader.upload(
+				avatar,
+				{
+					upload_preset: 'Yolo_Shop',
+					unique_filename: true,
+				}
+			)
 
 			avtUrl = secure_url
 
 			// Destroy old image
 			if (typeof user.avatar === 'string') {
-				await cloudinary.uploader.destroy(
-					constants.ROOT_IMG_ASSET +
-						user.avatar.substring(
-							user.avatar.lastIndexOf('/'),
-							user.avatar.lastIndexOf('.')
-						)
-				)
+				await cloudinary.uploader.destroy(getCloudinaryPublicId(user.avatar))
 			}
 		}
 

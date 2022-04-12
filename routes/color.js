@@ -3,9 +3,10 @@ const router = require('express').Router()
 const { Color } = require('../models/index')
 
 const auth = require('../middlewares/auth')
+const adminAuth = require('../middlewares/admin-auth')
 
-// @route   GET api/size
-// @desc    Get collection size
+// @route   GET api/color
+// @desc    Get all color
 // @access  Public
 router.get('/', async (req, res) => {
 	try {
@@ -30,8 +31,8 @@ router.get('/', async (req, res) => {
 
 // @route   POST api/color
 // @desc    Create a new color
-// @access
-router.post('/', async (req, res) => {
+// @access  Admin 
+router.post('/',adminAuth,  async (req, res) => {
 	try {
 		const { colorName, hex } = req.body
 
