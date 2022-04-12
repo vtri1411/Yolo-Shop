@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
+import { Link, useHistory } from 'react-router-dom'
 
 import orderHistoryColumn from '../../config/table/orderHistoryColumn'
 
@@ -56,10 +57,7 @@ const OrderHistory = () => {
 								return (
 									<tr {...row.getRowProps()}>
 										{row.cells.map((cell) => (
-											<td {...cell.getCellProps()}>
-												{' '}
-												{cell.render('Cell')}
-											</td>
+											<td {...cell.getCellProps()}> {cell.render('Cell')}</td>
 										))}
 									</tr>
 								)

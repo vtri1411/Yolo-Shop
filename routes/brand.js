@@ -3,6 +3,7 @@ const router = require('express').Router()
 const { Brand } = require('../models/index')
 
 const auth = require('../middlewares/auth')
+const adminAuth = require('../middlewares/admin-auth')
 
 // @route   GET api/brand
 // @desc    Get brand data
@@ -31,13 +32,9 @@ router.get('/', async (req, res) => {
 
 // @route   POST api/brand
 // @desc    Create a new brand
-// @access
-router.post('/', auth, async (req, res) => {
+// @access  Admin
+router.post('/', adminAuth, async (req, res) => {
 	try {
-		if (!req?.userRoles?.include('ADMIN')) {
-			return res.json({ status: 'FAIL', message: 'No permission' })
-		}
-
 		const { brandName } = req.body
 
 		if (!brandName) {
@@ -55,7 +52,7 @@ router.post('/', auth, async (req, res) => {
 			payload: brand,
 		})
 	} catch (error) {
-		console.log(error.errors)
+		console.log(error)
 		res.sendStatus(500)
 	}
 })

@@ -3,6 +3,7 @@ const router = require('express').Router()
 const { Category } = require('../models/index')
 
 const auth = require('../middlewares/auth')
+const adminAuth = require('../middlewares/admin-auth')
 
 // @route   GET api/category
 // @desc    Get collection category
@@ -30,13 +31,9 @@ router.get('/', async (req, res) => {
 
 // @route   POST api/category
 // @desc    Create a new category
-// @access
-router.post('/',auth,  async (req, res) => {
+// @access  Admin
+router.post('/', adminAuth, async (req, res) => {
 	try {
-      if (!req?.userRoles?.include('ADMIN')) {
-			return res.json({ status: 'FAIL', message: 'No permission' })
-		}
-
 		const { name } = req.body
 
 		if (!name) {

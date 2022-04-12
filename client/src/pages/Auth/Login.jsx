@@ -2,14 +2,16 @@ import React, { useCallback, useState } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 
-import googleLoginImg from '../../assets/images/btn_google_login.png'
-
 import validateInput, { TYPE } from '../../utilities/validateInput'
-import googleOauthUrl from '../../utilities/googleOauthUrl'
+import { githubOauthUrl, googleOauthUrl } from '../../utilities/getOAuthUrl'
 
 import { loginUser } from '../../redux/user/user.actions'
 
 import { toast } from 'react-toastify'
+import {
+	GoogleLoginButton,
+	GithubLoginButton,
+} from 'react-social-login-buttons'
 
 import Helmet from '../../components/Helmet'
 import AuthContainer from '../../components/Auth/AuthContainer'
@@ -65,9 +67,7 @@ const Login = () => {
 						value={email.value}
 						error={email.error}
 						labelText={'Email'}
-						onChange={(e) =>
-							setEmail({ ...email, value: e.target.value })
-						}
+						onChange={(e) => setEmail({ ...email, value: e.target.value })}
 						onBlur={validateEmail}
 						placeholder='Nhập email của bạn'
 						id={'login-email'}
@@ -90,8 +90,6 @@ const Login = () => {
 					<Button>Đăng nhập</Button>
 				</AuthForm>
 
-				{/* <AuthError error={loginError} /> */}
-
 				<div className='auth__link'>
 					<div className='auth__link__item'>
 						<Link to='/recovery' className='auth__link__item__link'>
@@ -99,9 +97,7 @@ const Login = () => {
 						</Link>
 					</div>
 					<div className='auth__link__item'>
-						<span className='auth__link__item__text'>
-							Chưa có tài khoản?
-						</span>
+						<span className='auth__link__item__text'>Chưa có tài khoản?</span>
 						<Link to='/register' className='auth__link__item__link'>
 							Đăng ký
 						</Link>
@@ -110,7 +106,11 @@ const Login = () => {
 
 				<div className='auth__oauth'>
 					<a className='auth__oauth__item' href={googleOauthUrl}>
-						<img src={googleLoginImg} alt='Login with google' />
+						<GoogleLoginButton className='auth__oauth__item__btn' />
+					</a>
+					{console.log(githubOauthUrl)}
+					<a className='auth__oauth__item' href={githubOauthUrl}>
+						<GithubLoginButton className='auth__oauth__item__btn' />
 					</a>
 				</div>
 			</AuthContainer>

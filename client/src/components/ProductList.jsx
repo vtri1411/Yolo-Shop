@@ -5,7 +5,6 @@ import ProductCard from './ProductCard'
 import Grid from './Grid'
 
 const ProductList = ({ title, products }) => {
-	console.log({ products })
 	return (
 		<Section>
 			{title && <SectionTitle>{title}</SectionTitle>}

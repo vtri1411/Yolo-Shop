@@ -11,6 +11,8 @@
 607: Expire time
 608: Email unverified
 609: Email verified
+613: Password is not set
+614: User is not admin
 
 610: Not enough amount
 611: Empty cart
@@ -20,9 +22,11 @@
 
 701: No row affected
 
+# OAuth error
+
+801: Github account don't have valid email
+
 ## Roles
 
 1. CLIENT
 2. ADMIN
-
-## Note when deploy:

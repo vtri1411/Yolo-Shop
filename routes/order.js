@@ -53,6 +53,7 @@ router.get('/:orderHistoryId', auth, async (req, res) => {
 		const orderDetail = await OrderDetail.findAll({
 			where: {
 				orderHistoryId: req.params.orderHistoryId,
+				'$orderHistory.userId$': req.userId,
 			},
 			include: [
 				{
@@ -78,8 +79,17 @@ router.get('/:orderHistoryId', auth, async (req, res) => {
 						},
 					],
 				},
+				{
+					model: OrderHistory,
+					attributes: ['userId'],
+					as: 'orderHistory',
+				},
 			],
 		})
+
+		if (!orderDetail?.length) {
+			throw new Error()
+		}
 
 		res.json({ status: 'SUCCESS', payload: orderDetail })
 	} catch (error) {

@@ -72,6 +72,24 @@
 	}
 
 	&__oauth {
+		display: flex;
 		margin-top: 15px;
+		justify-content: space-between;
+
+		&__item {
+			display: block;
+			width: max-content;
+
+			&__btn {
+				font-size: 1.6rem !important;
+				margin: 0 !important;
+				margin: 0 !important;
+				width: 100% !important;
+
+				div {
+					white-space: nowrap !important;
+				}
+			}
+		}
 	}
 }

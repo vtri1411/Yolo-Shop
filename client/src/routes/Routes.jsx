@@ -27,7 +27,7 @@ const Routes = () => {
 				exact
 				component={ResendVerification}
 			/>
-			<Route path='/oauth' exact component={OAuth} />
+			<Route path='/oauth/:type' exact component={OAuth} />
 			<Route path='/register' exact component={Register} />
 			<Route path='/recovery' exact component={Recovery} />
 			<Route

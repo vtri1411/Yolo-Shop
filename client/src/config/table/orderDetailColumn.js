@@ -5,11 +5,16 @@ export default [
 	{
 		Header: 'Ảnh',
 		accessor: 'inventory.product.images[0]',
-		Cell: (row) => (
-			<div>
-				<img style={{ display: 'block', width: '70px' }} src={row.value} />
-			</div>
-		),
+		Cell: (row) => {
+			return (
+				<div>
+					<img
+						style={{ display: 'block', width: '70px' }}
+						src={row.value.url}
+					/>
+				</div>
+			)
+		},
 	},
 	{
 		Header: 'Mã sản phẩm',

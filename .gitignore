@@ -1,6 +1,8 @@
 node_modules
 server/node_modules
 client/node_modules
+client/build
 .env
+.env.dev
 test.js
 TODO.js
